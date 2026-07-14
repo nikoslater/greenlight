@@ -211,6 +211,18 @@ from a local folder rather than a cloned repo, connect a GitHub repo once (creat
 one on github.com first): `git remote add origin https://github.com/you/your-repo.git`.
 Then push whenever you like, safe even mid-flight: `git push -u origin greenlight-build`
 
+**...I made more commits on `greenlight-build` and want to update the branch on GitHub?**
+Just push again. After that first `git push -u origin greenlight-build` linked the branch to
+its remote, a plain `git push` from `greenlight-build` sends up every new commit since last
+time:
+
+```bash
+git push
+```
+
+Safe during a safe window even while the loop is running. If a Pull Request is already open
+from this branch, the push updates that PR automatically — no need to reopen it.
+
 **...the loop says it needs ME?**
 When it hits a decision only a human can make (a secret key, a product call, a destructive
 migration) it marks the item BLOCKED, writes the exact question to `greenlight/DECISIONS.md`,
