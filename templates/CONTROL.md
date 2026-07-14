@@ -33,11 +33,14 @@ notify: "{{none|file|ntfy-url|slack-webhook}}"          # records the ping chann
 
 ## 0. Loop rules (critical — read every loop)
 
-**Do exactly ONE action per loop**, then log it. Pick the FIRST rung that applies:
+**Do exactly ONE productive action per loop**, then log it. Pick the FIRST rung that applies.
+(Marking a feature BLOCKED — recording the exact human ask in DECISIONS and writing it to
+`greenlight/state/NEEDS_HUMAN` — is bookkeeping, not the loop's action: when a rung can only
+reach a feature that needs a human, mark it BLOCKED and fall through to the next actionable rung.)
 
 1. **SECURITY** — a security regression, or an unchecked §4 item that is actionable *now* (the code it governs already exists). An item whose subject isn't built yet (e.g. rate limiting before any endpoint exists) is not actionable — leave it unchecked and fall through to the next rung; §4 must be fully checked before the DONE rung, not before every BUILD
 2. **REGRESSION** — a feature that was PASSING/STABLE is now BROKEN → find the break version in LEDGER, read that CHANGELOG entry, fix from that lead
-3. **BROKEN / UNBLOCK** — any other failing feature (fix, or mark BLOCKED with the exact human ask in DECISIONS). Also: a BLOCKED feature whose DECISIONS ask the human has now answered → apply the answer this loop (write its Contract and set it PLANNED for rung 5 to build, or mark it RETIRED), clearing BLOCKED. Only an unanswered ask keeps a feature BLOCKED
+3. **BROKEN / UNBLOCK / PROMOTE** — any other failing feature (fix, or mark BLOCKED with the exact human ask in DECISIONS). Also, apply a human answer this loop: (a) a BLOCKED feature whose DECISIONS ask has now been answered → write its Contract and set it PLANNED for rung 5 to build, or mark it RETIRED, clearing BLOCKED; (b) a DECISIONS idea the human has approved (`Status: approved`) → promote it into the Registry with a Contract, status PLANNED (this is the only path an idea becomes a buildable feature when `autonomous_feature_add: false`). Only an unanswered ask keeps a feature BLOCKED
 4. **VERIFY** — anything UNVERIFIED → run its `test_commands`, save evidence, promote or demote
 5. **BUILD** — next PLANNED feature → branch → build → its tests pass → merge
 6. **HARDEN** — re-run greens toward `stable_threshold` → STABLE
