@@ -15,9 +15,11 @@ are added, sessions that forget what's broken, and that generic "AI slop" look �
 cards, glowing gradients, buttons that do nothing. Greenlight is a set of files and two
 prompts that make the AI behave like a disciplined senior team instead.
 
-Everything Greenlight adds to your repo lives in a single `greenlight/` folder — prompts,
-templates, the working docs it generates, its runner, and runtime state (`greenlight/state/`,
-gitignored). Your repo root stays yours.
+Everything Greenlight generates lives in a single `greenlight/` folder — prompts, templates,
+the working docs it produces, its runner, and runtime state (`greenlight/state/`, gitignored).
+The only things it adds to your repo root are two small housekeeping touches: a couple of
+lines in `.gitignore` and a `.env.example` if you don't already have one. Your actual
+source tree stays yours.
 
 ---
 
@@ -65,10 +67,16 @@ git init                 # only if it isn't a git repo yet
 curl -fsSL https://raw.githubusercontent.com/YOU/greenlight/main/install.sh | bash
 ```
 
-**Strongly recommended: run Greenlight on a branch, not on `main`:**
+(`YOU` is a placeholder for the GitHub account this repo is published under — replace it
+with the owner in your address bar, e.g. `yourname/greenlight`.)
+
+**Strongly recommended: run Greenlight on a branch, not on `main`.** First make sure `main`
+actually exists to return to later — a freshly `git init`ed repo has no commits and no
+branch until you make one:
 
 ```bash
-git checkout -b greenlight-build
+git add -A && git commit -m "Set up Greenlight"   # first commit — creates `main`
+git checkout -b greenlight-build                  # all the loop's work happens here
 ```
 
 You're handing an autonomous agent the keys to the folder. On a branch, `main` stays
@@ -163,8 +171,10 @@ Ctrl-C during a safe window. Resume anytime with `./greenlight/run-loop.sh 300` 
 files are the loop's memory, so it picks up exactly where it left off, even days later.
 
 **...I want my progress backed up on GitHub?**
-The loop only commits locally — nothing leaves your computer on its own. Push whenever
-you like (safe even mid-flight): `git push -u origin greenlight-build`
+The loop only commits locally — nothing leaves your computer on its own. If you started
+from a local folder rather than a cloned repo, connect a GitHub repo once (create an empty
+one on github.com first): `git remote add origin https://github.com/you/your-repo.git`.
+Then push whenever you like, safe even mid-flight: `git push -u origin greenlight-build`
 
 **...the loop says it needs ME?**
 When it hits a decision only a human can make (a secret key, a product call, a destructive
