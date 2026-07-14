@@ -120,6 +120,18 @@ evidence, commit) and then waits. The terminal narrates:
 - The loop stops itself when the app is done ("GREENLIGHT ACHIEVED") — or stop it anytime
   with **Ctrl-C**, ideally during a safe window.
 
+**Running it overnight (Mac):** the screen turning off is fine, but system sleep pauses the
+loop and can kill an in-flight iteration. Prefix the command with macOS's built-in
+`caffeinate` to keep the machine awake exactly as long as the loop runs:
+
+```bash
+caffeinate -is ./greenlight/run-loop.sh 300
+```
+
+Keep the lid open (closing it forces sleep regardless) and stay plugged in (`-s` only
+prevents sleep on AC power). Nothing to undo afterward — sleep behavior returns to normal
+the moment the loop exits.
+
 ---
 
 ## While it runs — the two states that matter
