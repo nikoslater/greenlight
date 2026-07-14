@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Greenlight one-click install: run from your project root.
-#   curl -fsSL https://raw.githubusercontent.com/YOU/greenlight/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/nikoslater/greenlight/main/install.sh | bash
+# (Forking this to publish your own copy? Replace nikoslater/greenlight below with your repo.)
 set -euo pipefail
-REPO_RAW="${GREENLIGHT_RAW:-https://raw.githubusercontent.com/YOU/greenlight/main}"
+REPO_RAW="${GREENLIGHT_RAW:-https://raw.githubusercontent.com/nikoslater/greenlight/main}"
 # Everything Greenlight adds to your repo lives in ONE folder: greenlight/
 mkdir -p greenlight/templates greenlight/prompts greenlight/state/evidence
 for f in CONTROL.md STANDARDS.md STACKS.md LEDGER.md DECISIONS.md CHANGELOG.md; do

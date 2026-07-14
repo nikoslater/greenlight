@@ -64,11 +64,11 @@ them). And paste one command at a time until you're comfortable.
 ```bash
 cd your-project          # new empty folder or existing codebase — both work
 git init                 # only if it isn't a git repo yet
-curl -fsSL https://raw.githubusercontent.com/YOU/greenlight/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/nikoslater/greenlight/main/install.sh | bash
 ```
 
-(`YOU` is a placeholder for the GitHub account this repo is published under — replace it
-with the owner in your address bar, e.g. `yourname/greenlight`.)
+(This installs from `nikoslater/greenlight`. Forking Greenlight to publish your own copy?
+Replace `nikoslater` in the URL — and in `install.sh`'s `REPO_RAW` — with your account.)
 
 **Strongly recommended: run Greenlight on a branch, not on `main`.** First make sure `main`
 actually exists to return to later — a freshly `git init`ed repo has no commits and no
