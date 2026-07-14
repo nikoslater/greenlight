@@ -79,6 +79,11 @@ git add -A && git commit -m "Set up Greenlight"   # first commit — creates `ma
 git checkout -b greenlight-build                  # all the loop's work happens here
 ```
 
+(First time using git on this machine? If that commit errors with "Please tell me who you
+are," set your identity once and re-run it — the loop commits every iteration, so this must
+work: `git config --global user.name "Your Name"` and
+`git config --global user.email "you@example.com"`.)
+
 You're handing an autonomous agent the keys to the folder. On a branch, `main` stays
 untouched no matter what; when you're happy with the result you merge, and if a run ever
 goes sideways you throw the branch away and lose nothing.

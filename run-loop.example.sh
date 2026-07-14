@@ -9,6 +9,11 @@ INTERVAL="${1:-300}"
 PROMPT="greenlight/prompts/loop.md"
 STOP="greenlight/state/STOP"
 NEEDS_HUMAN="greenlight/state/NEEDS_HUMAN"
+
+if [ ! -f greenlight/CONTROL.md ]; then
+  echo "greenlight/CONTROL.md not found — run bootstrap first (README Part 2), then start the loop." >&2
+  exit 1
+fi
 mkdir -p greenlight/state
 
 notify() {  # swap body for: curl -d "$1" ntfy.sh/your-topic  |  or a Slack webhook
