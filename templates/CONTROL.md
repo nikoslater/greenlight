@@ -94,6 +94,7 @@ failure, or major rollover. When it hits the threshold, status becomes STABLE.*
 - [ ] No stack traces, internal errors, or PII in user-facing responses or logs
 - [ ] Rate limiting on public endpoints; least-privilege keys/DB user
 - [ ] 5-line threat model in DECISIONS.md
+- [ ] Profile-specific controls from STANDARDS.md are met (`auth` → a test proves user A can't read or mutate user B's data; `data_sensitivity: pii`/`regulated` → a complete delete-my-data path, and `regulated` was human-approved before any data was stored; `surface: api` → versioned routes + schema-validated bodies; `surface: web` → CSP/security headers + explicit CORS allowlist)
 *(An item the Profile makes N/A — e.g. no DB rules when `persistence: none` — counts as satisfied:
 check its box and append "N/A: <why>", so the DONE rung's "§4 fully checked" gate stays reachable.
 Never check a box that DOES apply and isn't done — leave those unchecked for the SECURITY rung.)*

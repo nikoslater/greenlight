@@ -72,6 +72,7 @@ notified before a streak breaks; all features STABLE, security baseline green.
 - [x] Deps vetted+pinned; audit clean · [x] No PII/stack traces in responses or logs
 - [x] Rate limiting (SEC-002); least-privilege DB user + send-only Resend key
 - [x] 5-line threat model in DECISIONS
+- [x] Profile controls: cross-user access test (A can't touch B's check-ins); CSP/security headers + CORS allowlist (`data_sensitivity: low`, not pii → no delete-my-data path required)
 
 ## 5. Next Action
 **→ HARDEN: one more re-run of all eight greens takes them from 2/3 to 3/3 → STABLE. F-005
