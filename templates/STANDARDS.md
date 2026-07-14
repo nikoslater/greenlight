@@ -55,7 +55,7 @@ Never cut on the way down: input validation at trust boundaries, error handling 
 
 ## If `surface` = web or the app has any UI
 - Follow `DESIGN.md` exactly — its typography, palette, spacing, and "never" list. The generic-AI signature (default sans + one accent on gray/beige, blue→purple gradients, glow effects, drop-shadow rounded cards everywhere, decorative emoji) is a build failure, not a style choice.
-- Every major screen ships its edge states as first-class work: empty (with a helpful next step), loading (skeleton, not spinner-forever), error (plain-language message + recovery action), and offline where the profile requires it. A screen without them is UNVERIFIED.
+- Every major screen ships its edge states as first-class work: empty (with a helpful next step), loading (skeleton, not spinner-forever), error (plain-language message + recovery action), and offline where the profile requires it. They are the screen's own UX-### registry feature, built and proven like any other — the screen passes against its own contract, and no app reaches DONE with a UX-### item unbuilt.
 - No dead affordances: anything styled as clickable must do something; anything non-interactive must not look interactive.
 - Interaction test every UI feature: click it, open it, submit it, tab through it (keyboard reachable). Screenshot at 390px and desktop; check for clipping, overflow, and layout breaks.
 - Real content lengths in tests: long names, empty lists, 1 item, 1000 items.
