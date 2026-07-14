@@ -35,7 +35,7 @@ notify: "{{none|file|ntfy-url|slack-webhook}}"          # how the harness pings 
 
 **Do exactly ONE action per loop**, then log it. Pick the FIRST rung that applies:
 
-1. **SECURITY** — unchecked §4 item or security regression
+1. **SECURITY** — a security regression, or an unchecked §4 item that is actionable *now* (the code it governs already exists). An item whose subject isn't built yet (e.g. rate limiting before any endpoint exists) is not actionable — leave it unchecked and fall through to the next rung; §4 must be fully checked before the DONE rung, not before every BUILD
 2. **REGRESSION** — a feature that was PASSING/STABLE is now BROKEN → find the break version in LEDGER, read that CHANGELOG entry, fix from that lead
 3. **BROKEN / UNBLOCK** — any other failing feature (fix, or mark BLOCKED with the exact human ask in DECISIONS). Also: a BLOCKED feature whose DECISIONS ask the human has now answered → apply the answer this loop (write its Contract and set it PLANNED for rung 5 to build, or mark it RETIRED), clearing BLOCKED. Only an unanswered ask keeps a feature BLOCKED
 4. **VERIFY** — anything UNVERIFIED → run its `test_commands`, save evidence, promote or demote
