@@ -9,7 +9,7 @@ Format:
 ## v<X.Y.Z> — loop <N> — <ISO timestamp>
 - Did: <what advanced this loop>
 - Why: <reason / which ladder rung>
-- Touched: <feature IDs> → <resulting dots>
+- Touched: <feature IDs> → <resulting statuses>
 - Commits/PRs: <links>
 - Follow-ups filed: <DECISIONS entries, if any>
 ```
