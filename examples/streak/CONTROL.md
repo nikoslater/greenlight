@@ -1,7 +1,7 @@
 ---
 project: "Streak"
 one_liner: "A daily habit check-in app that tracks streaks and nudges you when one is about to break."
-version: "1.2.2"
+version: "1.3.0"
 status: "HARDENING"
 greenlight: "no"
 loop_count: 24

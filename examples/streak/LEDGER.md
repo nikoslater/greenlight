@@ -41,7 +41,7 @@
 2026-02-20T09:40Z | loop=21 | v=1.2.1 | SEC-002 | STABLE | 3/3 | greenlight/state/evidence/sec-002-l21.txt
 2026-02-20T09:40Z | loop=21 | v=1.2.1 | F-001 | STABLE | 3/3; interaction: double-tap same day shows "already checked in" per contract | greenlight/state/evidence/f-001-l21.txt
 2026-02-20T09:40Z | loop=21 | v=1.2.1 | UX-002 | STABLE | 3/3 | greenlight/state/evidence/ux-002-l21.png
-2026-02-20T10:30Z | loop=22 | v=1.2.2 | F-004 | UNVERIFIED | streak-break email built: 19:00-local cron, one-per-day guard table | PR #14 / e88a01
-2026-02-20T10:55Z | loop=23 | v=1.2.2 | F-003 | PASSING | 2/3; interaction: heatmap cells open day detail, keyboard reachable | greenlight/state/evidence/f-003-l23-mobile.png
-2026-02-20T10:55Z | loop=23 | v=1.2.2 | UX-001 | PASSING | 2/3 | greenlight/state/evidence/ux-001-l23.png
-2026-02-20T11:42Z | loop=24 | v=1.2.2 | F-004 | PASSING | 1/3; integration: exactly one email sent in simulated at-risk day, none when checked in, none when streak <2 | greenlight/state/evidence/f-004-l24.txt
+2026-02-20T10:30Z | loop=22 | v=1.3.0 | F-004 | UNVERIFIED | streak-break email built: 19:00-local cron, one-per-day guard table | PR #14 / e88a01
+2026-02-20T10:55Z | loop=23 | v=1.3.0 | F-003 | PASSING | 2/3; interaction: heatmap cells open day detail, keyboard reachable | greenlight/state/evidence/f-003-l23-mobile.png
+2026-02-20T10:55Z | loop=23 | v=1.3.0 | UX-001 | PASSING | 2/3 | greenlight/state/evidence/ux-001-l23.png
+2026-02-20T11:42Z | loop=24 | v=1.3.0 | F-004 | PASSING | 1/3; integration: exactly one email sent in simulated at-risk day, none when checked in, none when streak <2 | greenlight/state/evidence/f-004-l24.txt

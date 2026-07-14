@@ -1,7 +1,7 @@
 ---
 project: "{{PROJECT_NAME}}"
 one_liner: "{{ONE_LINE_DESCRIPTION}}"
-version: "0.1.0"
+version: "0.1.0"               # bump on every loop that changes the app, so a LEDGER line names the version that broke a feature: MINOR when a BUILD merges a feature (0.2.0 → 0.3.0) · PATCH when a fix lands (rungs 1–3) · MAJOR only at the one-time v1.0.0 ROLLOVER · VERIFY/HARDEN change no code, so the version stays put
 status: "BOOTSTRAP"            # re-evaluate every loop from the §3 board: BOOTSTRAP = every feature still PLANNED · BUILDING = some built, some still PLANNED · HARDENING = none left PLANNED, still verifying/hardening · COMPLETE = set by the DONE rung
 greenlight: "no"               # flipped to "yes" ONLY by the DONE rung; loop does no work when "yes"
 loop_count: 0
@@ -47,7 +47,7 @@ notify: "{{none|file|ntfy-url|slack-webhook}}"          # records the ping chann
 
 **Statuses:** `PLANNED → UNVERIFIED → PASSING → STABLE`, plus `BROKEN`, `BLOCKED` (needs human — never guess), `RETIRED`. **"All STABLE" means every live feature is STABLE — RETIRED features are dead and excluded from every count.** BLOCKED counts differently per rung: for rung 7 (ROLLOVER) a BLOCKED feature is also excluded, because it has no contract yet and so has nothing for a retest milestone to re-prove — one unanswered ask must not pin the project below v1.0 forever. For rung 9 (DONE) it is *not* excluded: a BLOCKED feature is not STABLE and holds DONE until the human answers its DECISIONS ask and rung 3 takes it to STABLE or RETIRED. Any change to a feature demotes it to UNVERIFIED until re-proven. PASSING requires passing evidence from THIS loop, saved to `greenlight/state/evidence/`. UI features additionally require a fresh screenshot reviewed for broken layout.
 
-**Before finishing every loop:** append CHANGELOG entry → append LEDGER line per feature touched → update §3 board + front-matter (counters, and `status` re-evaluated from the board) → rewrite §5 Next Action → file any decisions/ideas in DECISIONS.
+**Before finishing every loop:** bump `version` per the rule above if the app changed (do this first — the CHANGELOG and LEDGER both record it) → append CHANGELOG entry under that version → append LEDGER line per feature touched, same version → update §3 board + front-matter (counters, and `status` re-evaluated from the board) → rewrite §5 Next Action → file any decisions/ideas in DECISIONS.
 
 ## 1. Charter
 **Problem / user:** {{...}}

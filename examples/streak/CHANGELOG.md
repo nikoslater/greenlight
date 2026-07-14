@@ -96,16 +96,16 @@
 - Did: hardened SEC-002, F-001, UX-002 → STABLE (3/3 each)
 - Why: Harden rung
 
-## v1.2.2 — loop 22 — 2026-02-20T10:30Z
+## v1.3.0 — loop 22 — 2026-02-20T10:30Z
 - Did: built F-004 streak-break notification (19:00-local cron, idempotent one-per-day guard)
 - Why: Build rung (last PLANNED feature) · Touched: F-004 → UNVERIFIED · Commits: PR #14 / e88a01
 - README updated: notifications feature + RESEND_API_KEY documented (matches .env.example)
 
-## v1.2.2 — loop 23 — 2026-02-20T10:55Z
+## v1.3.0 — loop 23 — 2026-02-20T10:55Z
 - Did: hardened F-003 + UX-001 (2/3); heatmap day-detail interaction + keyboard reachability verified
 - Why: Harden rung
 
-## v1.2.2 — loop 24 — 2026-02-20T11:42Z
+## v1.3.0 — loop 24 — 2026-02-20T11:42Z
 - Did: verified F-004 — exactly one email on simulated at-risk day; zero when checked in or streak <2
 - Why: Verify rung · Touched: F-004 → PASSING (1/3)
 - Next: harden F-003/UX-001/F-004 to STABLE; F-005 stays BLOCKED and holds the DONE rung until the human answers
