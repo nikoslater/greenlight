@@ -30,6 +30,9 @@ SwiftUI + Swift, SwiftData or SQLite for local persistence, CloudKit or the web-
 **Desktop**
 Tauri (web UI, tiny footprint) over Electron unless a needed Node API forces Electron.
 
+**Browser extension**
+TypeScript + the WebExtensions API (Manifest V3), bundled with Vite; no UI framework until a popup/options page grows enough to need one. Tests: Vitest + a headless-browser smoke check.
+
 ## Avoid for v1 (with the reason)
 - MongoDB "because it's easy" — schemaless bites at exactly the moment you have real users
 - GraphQL, tRPC-for-future-mobile, microservices — complexity before scale exists

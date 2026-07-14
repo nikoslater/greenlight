@@ -10,7 +10,7 @@ Format:
 - Did: <what advanced this loop>
 - Why: <reason / which ladder rung>
 - Touched: <feature IDs> → <resulting statuses>
-- Commits/PRs: <links>
+- Commits/PRs: <code commits or PRs; omit on a verify/harden/rollover loop that changed no code — its doc/status commit is in git>
 - Follow-ups filed: <DECISIONS entries, if any>
 ```
 

@@ -13,7 +13,7 @@ auth: "{{none|magic-link|oauth|password|api-key}}"     # none = deliberate, reco
 data_sensitivity: "{{none|low|pii|regulated}}"          # low = accounts/emails; pii = personal data; regulated = health/finance
 persistence: "{{none|sqlite|postgres|files|external}}"
 external_services: []                                   # e.g. [stripe, resend, s3]
-deploy_target: "{{local|vercel|fly|vps|app-store|none}}"
+deploy_target: "{{local|vercel|fly|railway|vps|app-store|none}}"
 
 # ---- Loop behavior ----
 test_commands:                                          # exact, copy-pasteable; loop runs these verbatim
