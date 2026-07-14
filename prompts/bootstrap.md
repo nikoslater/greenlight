@@ -56,7 +56,14 @@ scope/security risks in plain language, and propose a lean v1 list vs later. **W
 4. **Generate:** CONTROL.md (Profile filled, `greenlight: "no"`, Charter, Registry, board all PLANNED, exact runnable `test_commands`, first Next Action), the three seeded ledgers (threat model in DECISIONS; every assumption and stack justification recorded), README.md for the app (layperson install/run steps), `.env.example`, `greenlight/state/evidence/`, folder tree with module boundaries + `tests/` mirroring the registry + Playwright configured for interaction tests and screenshots.
 5. Don't build features — that's the loop's job. Finish with a plain-language summary: what will be built, in what order, and what I should double-check.
 
-**Both paths:** copy `greenlight/templates/STANDARDS.md` and `greenlight/templates/STACKS.md` to `greenlight/` unchanged. Keep everything you write short and specific — verbose context files make agents worse.
+**Both paths:** don't write the Greenlight docs from scratch — start every one of them from
+`greenlight/templates/`, copying it into `greenlight/` first. `STANDARDS.md` and `STACKS.md` are
+copied across unchanged. `CONTROL.md`, `LEDGER.md`, `DECISIONS.md` and `CHANGELOG.md` are the files
+you fill/seed above: keep each one's structure — in particular CONTROL.md's §0 Loop rules and
+front-matter keys verbatim, since the loop reads its priority ladder from there — and replace only
+the `{{...}}` placeholders and the sample rows/entries with real ones. (`DESIGN.md` and the app's
+README have no template; you write those.) Keep everything you write short and specific — verbose
+context files make agents worse.
 
 === MY IDEA DUMP (new projects only) ===
 {{paste here}}
