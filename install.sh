@@ -12,7 +12,8 @@ for f in bootstrap.md loop.md; do
   curl -fsSL "$REPO_RAW/prompts/$f" -o "greenlight/prompts/$f"
 done
 curl -fsSL "$REPO_RAW/run-loop.example.sh" -o greenlight/run-loop.sh && chmod +x greenlight/run-loop.sh
-grep -qxF '.env' .gitignore 2>/dev/null || printf '.env\ngreenlight/state/\n' >> .gitignore
+grep -qxF '.env' .gitignore 2>/dev/null || printf '.env\n' >> .gitignore
+grep -qxF 'greenlight/state/' .gitignore 2>/dev/null || printf 'greenlight/state/\n' >> .gitignore
 [ -f .env.example ] || printf '# Copy to .env and fill. Never commit real secrets.\n' > .env.example
 echo "Greenlight installed (everything under greenlight/)."
 echo "1) Run your agent with greenlight/prompts/bootstrap.md (paste your idea dump if the repo is new)"
