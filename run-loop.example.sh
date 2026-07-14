@@ -25,10 +25,10 @@ while true; do
     break
   fi
 
-  # --- your agent runner (uncomment / adapt): ---
-  # claude -p "$(cat "$PROMPT")" --dangerously-skip-permissions || notify "Loop iteration errored — check logs"
-  echo "[$(date -u +%FT%TZ)] would run agent with $PROMPT"
-  # ----------------------------------------------
+  echo "[$(date '+%H:%M:%S')] iteration started — MID-FLIGHT, don't edit the repo until it finishes"
+  # Default runner is Claude Code. Using a different agent CLI? Swap this one line.
+  claude -p "$(cat "$PROMPT")" --dangerously-skip-permissions || notify "Loop iteration errored — check output"
+  echo "[$(date '+%H:%M:%S')] iteration finished — safe window (next one in ${INTERVAL}s)"
 
   if [ -f "$NEEDS_HUMAN" ]; then
     notify "Loop needs a decision from you: $(head -c 200 "$NEEDS_HUMAN")"
