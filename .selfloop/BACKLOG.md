@@ -7,3 +7,5 @@ fixes something else first. One line per defect:
 Entries are claims, not verified truths: the next loop re-verifies each against the current
 files before acting, and deletes entries that are already fixed or refutable (logging why).
 Delete the line entirely when the defect is fixed (the fix's IMPROVEMENTS.md line is the record).
+
+- [ ] rung=2 | Re-running install.sh unconditionally re-downloads greenlight/run-loop.sh, wiping the notify() edit CONTROL.md tells the user to make; but guarding it means run-loop.sh bug-fixes won't propagate on re-install — weigh the tradeoff (guard-if-exists vs. document that re-running resets run-loop.sh) before acting | files: install.sh, templates/CONTROL.md
