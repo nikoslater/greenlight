@@ -1,7 +1,8 @@
 # Greenlight — Bootstrap (run once; new OR existing project)
 
-Run this in your project folder with your agent. New/empty repo → paste your idea dump at
-the bottom. Repo with code → just run it.
+Run this in your project folder with your agent. Repo with code → just run it. New/empty
+repo → either paste your idea dump at the bottom of this file first, or just run it and
+paste the dump into the chat when the agent asks for it.
 
 ---
 
@@ -26,6 +27,8 @@ Detect the situation first.
 ## B. New project → IDEATE, then SCAFFOLD
 
 ### B1. Understand (talk like a helpful friend, not an engineer)
+If the idea dump at the bottom is empty or still the `{{paste here}}` placeholder, ask me
+for it and wait for my answer — never invent the idea yourself.
 Reflect my dump back in 3–4 plain sentences. Then ask ONE batched round of questions in
 everyday language — no jargon, and give a recommended default with every question so I can
 just say "go with your suggestions." Only ask what the dump doesn't answer.
