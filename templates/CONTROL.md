@@ -41,7 +41,7 @@ notify: "{{none|file|ntfy-url|slack-webhook}}"          # records the ping chann
 4. **VERIFY** — anything UNVERIFIED → run its `test_commands`, save evidence, promote or demote
 5. **BUILD** — next PLANNED feature → branch → build → its tests pass → merge
 6. **HARDEN** — re-run greens toward `stable_threshold` → STABLE
-7. **ROLLOVER** — all STABLE and version still 0.x → bump to v1.0.0, demote all to UNVERIFIED, full retest (one-time v1.0 milestone; never fires again at ≥1.0)
+7. **ROLLOVER** — all STABLE and version still 0.x → bump to v1.0.0, demote every green (STABLE/PASSING) feature to UNVERIFIED, full retest. RETIRED and BLOCKED features keep their status: a rollover must never resurrect a dead feature, and a BLOCKED one has no contract to retest (one-time v1.0 milestone; never fires again at ≥1.0)
 8. **IDEATE** — nothing pending AND DECISIONS has no entry titled "IDEATE round" → file ≤3 ideas in DECISIONS as ONE entry titled exactly `IDEATE round` (that title is the marker rungs 8 and 9 both read; ideas filed ad-hoc by any other loop are NOT the round and neither arm nor satisfy this rung). Once ever: never re-arm, not even after the ideas themselves change the app (build one only if `autonomous_feature_add: true`; otherwise they sit at "pending review" for the human and do NOT block DONE)
 9. **DONE** — all STABLE + §4 fully checked + fresh UI evidence for every UI feature (a Profile with no UI — e.g. `surface: cli` or `api` — has no UI features, so this clause is already satisfied) + the "IDEATE round" entry exists in DECISIONS → set `greenlight: "yes"` and `status: COMPLETE`, write `greenlight/state/STOP`, and output only: "GREENLIGHT ACHIEVED — the app is finished. Stop the loop and review your app."
 
