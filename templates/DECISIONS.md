@@ -1,7 +1,10 @@
 # DECISIONS.md — append-only rationale, feature ideas, security calls
 
-> Why things are the way they are. Append-only. This is where the loop "thinks out
-> loud" so a future session inherits the reasoning, not just the result.
+> Why things are the way they are. Append-only — never edit or delete a past entry — with
+> ONE exception: an idea entry's `Status:` line is a live pointer to that idea's fate and may
+> be updated in place as it moves (pending review → approved → promoted/rejected). Everything
+> else, once written, stays. This is where the loop "thinks out loud" so a future session
+> inherits the reasoning, not just the result.
 
 Use one block per entry:
 
@@ -10,7 +13,7 @@ Use one block per entry:
 Type: decision | idea | security | blocker
 Context: ...
 Call: ...
-Status: (for ideas) pending review | promoted to F-0XX | rejected
+Status: (for ideas) pending review | approved | promoted to F-0XX | rejected
 ```
 
 ---

@@ -1,6 +1,7 @@
 # DECISIONS.md — append-only rationale, feature ideas, security calls
 
-> Why things are the way they are. Append-only.
+> Why things are the way they are. Append-only, except an idea's `Status:` line, which tracks
+> its fate in place (see the loop-5 nudge idea below).
 
 ---
 
