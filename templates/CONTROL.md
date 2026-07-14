@@ -63,6 +63,7 @@ loop. This is the one loop that legitimately makes no change and no commit — i
 
 ## 1. Charter
 **Problem / user:** {{...}}
+**The one job to nail:** {{the single flow that, if it feels great, the app succeeds — bootstrap's key question}}
 **Success:** {{concrete finish criteria}}
 **Non-goals:** {{explicit out-of-scope}}
 
