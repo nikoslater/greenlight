@@ -1,7 +1,7 @@
 ---
 project: "Streak"
 one_liner: "A daily habit check-in app that tracks streaks and nudges you when one is about to break."
-version: "1.3.0"
+version: "1.1.1"
 status: "HARDENING"
 greenlight: "no"
 loop_count: 24
@@ -55,16 +55,16 @@ notified before a streak breaks; all features STABLE, security baseline green.
 
 | ID | Feature | Status | Passes | Last verified | Evidence |
 |--------|---------|--------|--------|---------------|----------|
-| SEC-001 | Magic-link auth | STABLE | 3/3 | 2026-02-20T09:12Z | sec-001-l20.txt |
-| SEC-002 | Rate limiting | STABLE | 3/3 | 2026-02-20T09:40Z | sec-002-l21.txt |
-| F-001 | Daily check-in | STABLE | 3/3 | 2026-02-20T09:40Z | f-001-l21.txt |
-| F-002 | Streak counter | STABLE | 3/3 | 2026-02-20T09:12Z | f-002-l20.txt |
-| F-003 | Dashboard | PASSING | 2/3 | 2026-02-20T10:55Z | f-003-l23-mobile.png |
-| F-004 | Streak-break notify | PASSING | 1/3 | 2026-02-20T11:42Z | f-004-l24.txt |
-| UX-001 | Dashboard edge states | PASSING | 2/3 | 2026-02-20T10:55Z | ux-001-l23.png |
-| UX-002 | Auth edge states | STABLE | 3/3 | 2026-02-20T09:40Z | ux-002-l21.png |
-| F-005 | Friend pairing | BLOCKED | — | — | DECISIONS 02-18T10:05Z |
-| F-006 | Password login | RETIRED | — | 2026-02-18T09:15Z | — |
+| SEC-001 | Magic-link auth | PASSING | 2/3 | 2026-02-20T11:42Z | sec-001-l24.txt |
+| SEC-002 | Rate limiting | PASSING | 2/3 | 2026-02-20T11:42Z | sec-002-l24.txt |
+| F-001 | Daily check-in | PASSING | 2/3 | 2026-02-20T11:42Z | f-001-l24.txt |
+| F-002 | Streak counter | PASSING | 2/3 | 2026-02-20T11:42Z | f-002-l24.txt |
+| F-003 | Dashboard | PASSING | 2/3 | 2026-02-20T11:42Z | f-003-l24-mobile.png |
+| F-004 | Streak-break notify | PASSING | 2/3 | 2026-02-20T11:42Z | f-004-l24.txt |
+| UX-001 | Dashboard edge states | PASSING | 2/3 | 2026-02-20T11:42Z | ux-001-l24.png |
+| UX-002 | Auth edge states | PASSING | 2/3 | 2026-02-20T11:42Z | ux-002-l24.png |
+| F-005 | Friend pairing | BLOCKED | — | — | DECISIONS 02-19T09:26Z |
+| F-006 | Password login | RETIRED | — | 2026-02-18T09:02Z | — |
 
 ## 4. Security Baseline — all checked ✅ (threat model: DECISIONS 2026-02-18T09:00Z)
 - [x] Secrets env-only; `.env.example` committed · [x] Auth+authz enforced per route
@@ -74,8 +74,7 @@ notified before a streak breaks; all features STABLE, security baseline green.
 - [x] 5-line threat model in DECISIONS
 
 ## 5. Next Action
-**→ HARDEN: re-run F-003 + UX-001 (pass 3/3 → STABLE), then harden F-004 (needs 2 more
-passes; verify the one-email-per-day guard across a simulated 2-day window). F-005 stays
-BLOCKED awaiting the human's invite-model decision — BLOCKED is not STABLE, so it holds the
-DONE rung: even with everything else STABLE the loop cannot greenlight until the human
+**→ HARDEN: one more re-run of all eight greens takes them from 2/3 to 3/3 → STABLE. F-005
+stays BLOCKED awaiting the human's invite-model decision — BLOCKED is not STABLE, so it holds
+the DONE rung: even with everything else STABLE the loop cannot greenlight until the human
 answers in DECISIONS and F-005 is built to STABLE or RETIRED.**

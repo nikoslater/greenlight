@@ -12,59 +12,71 @@ Type: security
 4. Biggest realistic abuse = check-in endpoint spam / fake streaks, and magic-link token replay.
 5. Stance = passwordless with short-lived single-use tokens, httpOnly sessions, per-user rate limits.
 
-## 2026-02-18T09:15Z loop=2 — Auth: magic link over password
-Type: decision
-Context: v1 has no need to store password hashes; email is already the identity.
-Call: email magic link (SEC-001), single-use tokens with 10-min expiry, httpOnly + SameSite cookies.
-Consequence: retire F-006 (email/password login) entirely — less attack surface, no hash storage.
-
-## 2026-02-18T10:05Z loop=5 — Idea: streak-break notification
-Type: idea
-Context: while building the streak counter (F-002), realized users have no reason to return the day
-a streak is at risk. A nudge is the natural retention lever and falls straight out of the core loop.
-Call: propose a notification that fires when a user hasn't checked in and their streak will break tonight.
-Status: pending review → **approved by the human 2026-02-19** (autonomous_feature_add is false, so only they can
-green-light an idea) → **promoted to F-004** (contract written, PLANNED) by loop 14.
-
-## 2026-02-18T10:05Z loop=5 — Blocker: friend accountability pairing (F-005)
-Type: blocker
-Context: user floated "pair with a friend so they see if you miss." Needs product calls I won't guess:
-invite model (link vs email), what the partner can see (privacy), and whether it needs a 3rd-party
-push service. autonomous_feature_add is false.
-Call: mark F-005 BLOCKED. Needs human: (a) invite mechanism, (b) partner visibility scope.
-
-## 2026-02-19T08:30Z loop=12 — Major rollover to v1.0.0
-Type: decision
-Context: SEC-001, F-001, F-002 and F-003 have all hit STABLE — the rollover rung needs every live
-feature STABLE, not merely PASSING, so hardening F-003 first (loops 9-10) was the higher rung.
-Call: bump to v1.0.0 as a full-retest milestone. Per the rollover rule, demote every green feature to
-UNVERIFIED and retest from scratch — cheap insurance before layering new work on top.
-
-## 2026-02-19T09:58Z loop=17 — Postmortem: SEC-002 broke F-001
-Type: security
-Context: v1.1.0 added rate limiting (SEC-002) keyed per-IP at 5 req/min. Users behind shared NAT
-(offices, mobile carriers) tripped the limit on a single legit check-in → 429. Regression caught by
-F-001's smoke test at loop 16, traced to the v1.1.0 changelog entry.
-Call: re-key the limiter per authenticated user, give the check-in route its own generous bucket, keep
-the tight per-IP limit only on the unauthenticated magic-link request route. Lesson logged: any change
-touching the check-in endpoint must re-run F-001 before merge.
-
-## 2026-02-19T10:05Z loop=14-review — Stack (recorded per STACKS.md)
+## 2026-02-18T09:01Z loop=0 — Stack + bootstrap assumptions (recorded per STACKS.md)
 Type: decision
 Call: STACKS.md web default as-is — Next.js/TS/Tailwind, Supabase Postgres + Drizzle, Supabase Auth
 (magic link), Resend, Vercel, Vitest + Playwright. Zero deviations. Deps: 9 total, each justified
-in PR #1. Assumed at bootstrap (marked cheap-to-change): single-tenant per user, ~100 users year one,
-no offline mode beyond retry-on-reconnect.
+in PR #1. Assumed at bootstrap (marked cheap-to-change until v1.0): single-tenant per user, ~100
+users year one, no offline mode beyond retry-on-reconnect.
 
-## 2026-02-19T10:44Z loop=19 — UX regression class: mobile overflow
+## 2026-02-18T09:02Z loop=1 — Auth: magic link over password
 Type: decision
-Context: interaction pass caught heatmap overflow at 390px and streak-number clipping <320px —
+Context: the braindump asked for email+password, so bootstrap registered it as F-006. STACKS is
+explicit — never hand-roll password hashing or session crypto — and email is already the identity.
+Call: email magic link (SEC-001), single-use tokens with 10-min expiry, httpOnly + SameSite cookies.
+Consequence: retire F-006 entirely — less attack surface, no hash storage.
+
+## 2026-02-18T09:15Z loop=2 — Rate limits are keyed per user, never per IP
+Type: security
+Context: the Security rung fired as soon as public routes existed. The obvious implementation —
+5/min per IP on everything — would 429 legitimate users behind shared NAT (offices, mobile carriers)
+the moment the authenticated check-in route lands.
+Call: SEC-002 keeps the tight per-IP limit only on the unauthenticated magic-link route; authenticated
+routes are limited per user (30/min) by middleware, so routes added later inherit the right behavior.
+
+## 2026-02-18T10:05Z loop=5 — Idea: streak-break notification
+Type: idea
+Context: while verifying the check-in flow (F-001), realized users have no reason to return the day
+a streak is at risk. A nudge is the natural retention lever and falls straight out of the core loop.
+Call: propose a notification that fires when a user hasn't checked in and their streak will break tonight.
+Status: pending review → **approved by the human 2026-02-19** (autonomous_feature_add is false, so only they can
+green-light an idea) → **promoted to F-004** (contract written, PLANNED) by loop 18.
+
+## 2026-02-19T08:30Z loop=12 — UX regression class: mobile overflow
+Type: decision
+Context: the interaction pass caught heatmap overflow at 390px and streak-number clipping under 320px —
 invisible in desktop-only screenshots. This is exactly why the interaction pass exists.
-Call: heatmap becomes horizontally scrollable on narrow viewports (DESIGN.md updated);
-minimum supported width set to 360px and added to UX-001 contract.
+Call: the heatmap becomes horizontally scrollable on narrow viewports (DESIGN.md updated);
+minimum supported width set to 360px and added to the UX-001 contract.
 
-## 2026-02-20T10:30Z loop=22 — F-004 one-email-per-day guard
+## 2026-02-19T09:26Z loop=15 — Blocker: friend accountability pairing (F-005)
+Type: blocker
+Context: the Build rung reached F-005 — "pair with a friend so they see if you miss" — and it needs
+product calls I won't guess: invite model (link vs email), what the partner can see (privacy), and
+whether it needs a 3rd-party push service. autonomous_feature_add is false.
+Call: mark F-005 BLOCKED. Needs human: (a) invite mechanism, (b) partner visibility scope.
+Until it is answered, F-005 is not STABLE and it holds the DONE rung.
+
+## 2026-02-19T09:58Z loop=17 — Major rollover to v1.0.0
 Type: decision
-Context: contract says never more than one nudge/day; cron retries could double-send.
-Call: `nudges_sent(user_id, date)` unique-constraint table checked before send — idempotent by
+Context: every live feature — SEC-001, SEC-002, F-001, F-002, F-003, UX-001, UX-002 — is STABLE, not
+merely PASSING, which is what the rollover rung requires. F-005 is BLOCKED (no contract to re-prove)
+and F-006 is RETIRED, so neither is counted here.
+Call: bump to v1.0.0 as a full-retest milestone. Per the rollover rule, demote every green feature to
+UNVERIFIED and retest from scratch — cheap insurance before layering new work on top.
+
+## 2026-02-20T09:12Z loop=20 — F-004 one-email-per-day guard
+Type: decision
+Context: the contract says never more than one nudge per day; cron retries could double-send.
+Call: a `nudges_sent(user_id, date)` unique-constraint table is checked before send — idempotent by
 construction, not by timing. Send failures log the Resend error ID, never the user's email address.
+
+## 2026-02-20T10:30Z loop=22 — Postmortem: the shared timezone helper broke F-002
+Type: decision
+Context: the F-004 build (v1.1.0) needed the day boundary for its 19:00-local cron and pulled F-002's
+inline date math into one shared helper — a sensible de-duplication that quietly switched the cut-off
+to UTC midnight. F-002 was demoted to UNVERIFIED because its code changed, the next Verify loop caught
+the DST spring-forward double-count, and the LEDGER named v1.1.0 as the break version.
+Call: the helper takes an explicit timezone and cuts days at local midnight; both callers pass the
+user's TZ. Lesson logged: a refactor that touches a feature's code is a change to that feature — it is
+re-proven before anything else advances, which is what turned a silent bug into a caught one.
