@@ -11,7 +11,8 @@ done
 for f in bootstrap.md loop.md; do
   curl -fsSL "$REPO_RAW/prompts/$f" -o "greenlight/prompts/$f"
 done
-curl -fsSL "$REPO_RAW/run-loop.example.sh" -o greenlight/run-loop.sh && chmod +x greenlight/run-loop.sh
+curl -fsSL "$REPO_RAW/run-loop.example.sh" -o greenlight/run-loop.sh
+chmod +x greenlight/run-loop.sh
 # if .gitignore's last line has no trailing newline, our append would fuse onto it
 if [ -s .gitignore ] && [ -n "$(tail -c 1 .gitignore)" ]; then printf '\n' >> .gitignore; fi
 grep -qxF '.env' .gitignore 2>/dev/null || printf '.env\n' >> .gitignore
