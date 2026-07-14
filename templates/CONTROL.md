@@ -34,9 +34,11 @@ notify: "{{none|file|ntfy-url|slack-webhook}}"          # records the ping chann
 ## 0. Loop rules (critical — read every loop)
 
 **Do exactly ONE productive action per loop**, then log it. Pick the FIRST rung that applies.
-(Marking a feature BLOCKED — recording the exact human ask in DECISIONS and writing it to
-`greenlight/state/NEEDS_HUMAN` — is bookkeeping, not the loop's action: when a rung can only
-reach a feature that needs a human, mark it BLOCKED and fall through to the next actionable rung.)
+(Two kinds of human-handoff bookkeeping do not by themselves consume a loop's productive
+action — do them as you notice them, then take the first work rung that applies: marking a
+feature BLOCKED with its ask in DECISIONS + `greenlight/state/NEEDS_HUMAN`; and applying an
+answer already sitting in DECISIONS — unblocking a feature or promoting an approved idea to a
+PLANNED registry entry, both per rung 3.)
 
 1. **SECURITY** — a security regression, or an unchecked §4 item that is actionable *now* (the code it governs already exists). An item whose subject isn't built yet (e.g. rate limiting before any endpoint exists) is not actionable — leave it unchecked and fall through to the next rung; §4 must be fully checked before the DONE rung, not before every BUILD
 2. **REGRESSION** — a feature that was PASSING/STABLE is now BROKEN → find the break version in LEDGER, read that CHANGELOG entry, fix from that lead
