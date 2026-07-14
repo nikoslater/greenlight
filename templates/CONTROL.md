@@ -22,7 +22,7 @@ test_commands:                                          # exact, copy-pasteable;
   interaction: "{{e.g. npx playwright test ui — required if the app has a UI}}"
 autonomous_feature_add: false     # true = loop may build its own ideas; false = ideas wait for you
 stable_threshold: 3               # consecutive passes → STABLE
-notify: "{{none|file|ntfy-url|slack-webhook}}"          # how the harness pings you at COMPLETE/BLOCKED
+notify: "{{none|file|ntfy-url|slack-webhook}}"          # records the ping channel you want at COMPLETE/BLOCKED; the runner does not read this key — edit notify() in greenlight/run-loop.sh to match it (it ships with desktop notifications)
 ---
 
 # CONTROL.md — source of truth for {{PROJECT_NAME}}
