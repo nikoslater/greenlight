@@ -43,9 +43,9 @@ notify: "{{none|file|ntfy-url|slack-webhook}}"          # how the harness pings 
 6. **HARDEN** — re-run greens toward `stable_threshold` → STABLE
 7. **ROLLOVER** — all STABLE → bump MAJOR version, demote all to UNVERIFIED, full retest
 8. **IDEATE** — nothing pending → file ≤3 ideas in DECISIONS (build one only if `autonomous_feature_add: true`)
-9. **DONE** — all STABLE + §4 fully checked + fresh UI evidence + no pending ideas → set `greenlight: "yes"` and `status: COMPLETE`, write `.greenlight/STOP`, and output only: "GREENLIGHT ACHIEVED — the app is finished. Stop the loop and review your app."
+9. **DONE** — all STABLE + §4 fully checked + fresh UI evidence + no pending ideas → set `greenlight: "yes"` and `status: COMPLETE`, write `greenlight/state/STOP`, and output only: "GREENLIGHT ACHIEVED — the app is finished. Stop the loop and review your app."
 
-**Statuses:** `PLANNED → UNVERIFIED → PASSING → STABLE`, plus `BROKEN`, `BLOCKED` (needs human — never guess), `RETIRED`. Any change to a feature demotes it to UNVERIFIED until re-proven. PASSING requires passing evidence from THIS loop, saved to `.greenlight/evidence/`. UI features additionally require a fresh screenshot reviewed for broken layout.
+**Statuses:** `PLANNED → UNVERIFIED → PASSING → STABLE`, plus `BROKEN`, `BLOCKED` (needs human — never guess), `RETIRED`. Any change to a feature demotes it to UNVERIFIED until re-proven. PASSING requires passing evidence from THIS loop, saved to `greenlight/state/evidence/`. UI features additionally require a fresh screenshot reviewed for broken layout.
 
 **Before finishing every loop:** append CHANGELOG entry → append LEDGER line per feature touched → update §3 board + front-matter counters → rewrite §5 Next Action → file any decisions/ideas in DECISIONS.
 

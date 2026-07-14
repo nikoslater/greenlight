@@ -27,8 +27,12 @@ curl -fsSL https://raw.githubusercontent.com/YOU/greenlight/main/install.sh | ba
 #    Existing project → it studies your code and sets everything up automatically.
 
 # 3. Start the loop — one work step every 5 minutes until done:
-./run-loop.sh 300
+./greenlight/run-loop.sh 300
 ```
+
+Everything Greenlight adds to your repo lives in a single `greenlight/` folder — prompts,
+templates, the working docs it generates, its runner, and runtime state (`greenlight/state/`,
+gitignored). Your repo root stays yours.
 
 When the app is truly finished — every feature stable, security checklist green, UI
 verified by actually clicking through it — the loop flips `greenlight: "yes"`, stops doing

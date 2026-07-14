@@ -5,8 +5,12 @@ the bottom. Repo with code → just run it.
 
 ---
 
-You are bootstrapping this repository into the Greenlight system (templates in
-`greenlight/templates/`). This phase determines everything downstream: the stack chosen
+You are bootstrapping this repository into the Greenlight system. Everything Greenlight
+owns lives in ONE folder: `greenlight/` — templates in `greenlight/templates/`, the working
+docs you generate (CONTROL.md, STANDARDS.md, STACKS.md, DESIGN.md, LEDGER.md, DECISIONS.md,
+CHANGELOG.md) directly in `greenlight/`, runtime state in `greenlight/state/`. Never scatter
+Greenlight files elsewhere in the repo; bare filenames below mean the `greenlight/` copies.
+This phase determines everything downstream: the stack chosen
 here is the stack forever, the questions skipped here become rewrites later. Be rigorous
 here so the loop never has to re-architect.
 
@@ -49,10 +53,10 @@ scope/security risks in plain language, and propose a lean v1 list vs later. **W
 1. **Stack & packages — pick from `STACKS.md`.** Use its default for the profile unless there is a specific, recorded reason to deviate (record it in DECISIONS). Verify every package exists on the public registry and is maintained. Fewest dependencies wins; prefer platform/stdlib capabilities (STANDARDS "Write less code"). List the exact initial dependency set with a one-line reason each.
 2. **Design brief — write `DESIGN.md` (1 page).** Personality in 3 adjectives, a real typography choice (not the default sans everyone gets), a small palette with one clear hierarchy, spacing scale, and a short "never" list: no blue→purple gradients, no glow effects, no beige-default, no decorative emoji, no equal-volume neon. Specify the edge states (empty, loading, error, offline) as designed screens, not afterthoughts — these are what separate real apps from vibe-coded demos.
 3. **Registry with Contracts:** write a one-to-two sentence behavioral Contract for every feature — exact expected behavior including the tricky part (timezones, duplicates, limits). These contracts are the permanent spec the loop builds and tests against, so a fresh session can never misinterpret a feature. Use stable IDs (F-### features, SEC-### security, UX-### edge-state/design items). Every UI feature's required tests include an interaction pass (click/open/submit) and a screenshot at mobile + desktop widths. Add UX-### items for empty/loading/error states of each major screen.
-4. **Generate:** CONTROL.md (Profile filled, `greenlight: "no"`, Charter, Registry, board all PLANNED, exact runnable `test_commands`, first Next Action), the three seeded ledgers (threat model in DECISIONS; every assumption and stack justification recorded), README.md for the app (layperson install/run steps), `.env.example`, `.greenlight/evidence/`, folder tree with module boundaries + `tests/` mirroring the registry + Playwright configured for interaction tests and screenshots.
+4. **Generate:** CONTROL.md (Profile filled, `greenlight: "no"`, Charter, Registry, board all PLANNED, exact runnable `test_commands`, first Next Action), the three seeded ledgers (threat model in DECISIONS; every assumption and stack justification recorded), README.md for the app (layperson install/run steps), `.env.example`, `greenlight/state/evidence/`, folder tree with module boundaries + `tests/` mirroring the registry + Playwright configured for interaction tests and screenshots.
 5. Don't build features — that's the loop's job. Finish with a plain-language summary: what will be built, in what order, and what I should double-check.
 
-**Both paths:** copy `greenlight/templates/STANDARDS.md` and `greenlight/templates/STACKS.md` to the repo root unchanged. Keep everything you write short and specific — verbose context files make agents worse.
+**Both paths:** copy `greenlight/templates/STANDARDS.md` and `greenlight/templates/STACKS.md` to `greenlight/` unchanged. Keep everything you write short and specific — verbose context files make agents worse.
 
 === MY IDEA DUMP (new projects only) ===
 {{paste here}}

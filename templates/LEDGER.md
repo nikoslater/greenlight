@@ -8,11 +8,11 @@ Format:
 `[ISO-8601 timestamp] | loop=N | v=X.Y.Z | ID | STATUS | note | evidence`
 
 - STATUS: UNVERIFIED · PASSING · STABLE · BROKEN · BLOCKED · RETIRED
-- evidence: test-output or screenshot path under `.greenlight/evidence/`, or commit/PR
+- evidence: test-output or screenshot path under `greenlight/state/evidence/`, or commit/PR
 
 ---
 
 <!-- APPEND BELOW. Example rows: -->
 
 2026-01-01T00:00:00Z | loop=1 | v=0.1.0 | SEC-001 | UNVERIFIED | auth scaffolded, not tested | commit abc123
-2026-01-01T00:05:00Z | loop=2 | v=0.1.0 | SEC-001 | PASSING | login/logout unit tests pass | .greenlight/evidence/sec-001-l2.txt
+2026-01-01T00:05:00Z | loop=2 | v=0.1.0 | SEC-001 | PASSING | login/logout unit tests pass | greenlight/state/evidence/sec-001-l2.txt

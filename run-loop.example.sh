@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
-# Greenlight loop harness. Usage: ./run-loop.sh [interval_seconds]
+# Greenlight loop harness. Installed at greenlight/run-loop.sh; run from your project root:
+#   ./greenlight/run-loop.sh [interval_seconds]
 set -uo pipefail   # deliberately NOT -e: one failed iteration must not kill the loop
+
+cd "$(dirname "$0")/.."   # always operate from the project root, wherever invoked from
 
 INTERVAL="${1:-300}"
 PROMPT="greenlight/prompts/loop.md"
-STOP=".greenlight/STOP"
-NEEDS_HUMAN=".greenlight/NEEDS_HUMAN"
-mkdir -p .greenlight
+STOP="greenlight/state/STOP"
+NEEDS_HUMAN="greenlight/state/NEEDS_HUMAN"
+mkdir -p greenlight/state
 
 notify() {  # swap body for: curl -d "$1" ntfy.sh/your-topic  |  or a Slack webhook
   if command -v osascript >/dev/null 2>&1; then
