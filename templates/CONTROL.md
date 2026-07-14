@@ -42,8 +42,8 @@ notify: "{{none|file|ntfy-url|slack-webhook}}"          # how the harness pings 
 5. **BUILD** — next PLANNED feature → branch → build → its tests pass → merge
 6. **HARDEN** — re-run greens toward `stable_threshold` → STABLE
 7. **ROLLOVER** — all STABLE and version still 0.x → bump to v1.0.0, demote all to UNVERIFIED, full retest (one-time v1.0 milestone; never fires again at ≥1.0)
-8. **IDEATE** — nothing pending → file ≤3 ideas in DECISIONS (build one only if `autonomous_feature_add: true`)
-9. **DONE** — all STABLE + §4 fully checked + fresh UI evidence + no pending ideas → set `greenlight: "yes"` and `status: COMPLETE`, write `greenlight/state/STOP`, and output only: "GREENLIGHT ACHIEVED — the app is finished. Stop the loop and review your app."
+8. **IDEATE** — nothing pending AND no idea round filed since the last feature change → file ≤3 ideas in DECISIONS, once (build one only if `autonomous_feature_add: true`; otherwise they sit at "pending review" for the human and do NOT block DONE)
+9. **DONE** — all STABLE + §4 fully checked + fresh UI evidence + the IDEATE round already filed → set `greenlight: "yes"` and `status: COMPLETE`, write `greenlight/state/STOP`, and output only: "GREENLIGHT ACHIEVED — the app is finished. Stop the loop and review your app."
 
 **Statuses:** `PLANNED → UNVERIFIED → PASSING → STABLE`, plus `BROKEN`, `BLOCKED` (needs human — never guess), `RETIRED`. Any change to a feature demotes it to UNVERIFIED until re-proven. PASSING requires passing evidence from THIS loop, saved to `greenlight/state/evidence/`. UI features additionally require a fresh screenshot reviewed for broken layout.
 
