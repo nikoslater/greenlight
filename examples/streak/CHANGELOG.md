@@ -59,7 +59,8 @@
 - Did: retest SEC-001 (1/3 post-rollover) · Touched: SEC-001 → PASSING
 
 ## v1.0.0 — loop 14 — 2026-02-19T09:01Z
-- Did: retest F-001, F-002, F-003 (1/3) — all green; reviewed idea backlog and **promoted F-004** to PLANNED
+- Did: retest F-001, F-002, F-003 (1/3) — all green; the human approved the loop-5 nudge idea in DECISIONS, so entered it in the registry as **F-004** with a contract, status PLANNED
+- Why: Verify rung; `autonomous_feature_add: false`, so the loop never promotes its own idea — it waited for the human's approval before F-004 existed as a feature
 - Touched: F-001, F-002, F-003 → PASSING; F-004 → PLANNED
 
 ## v1.1.0 — loop 15 — 2026-02-19T09:26Z

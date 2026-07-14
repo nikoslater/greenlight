@@ -23,7 +23,8 @@ Type: idea
 Context: while building the streak counter (F-002), realized users have no reason to return the day
 a streak is at risk. A nudge is the natural retention lever and falls straight out of the core loop.
 Call: propose a notification that fires when a user hasn't checked in and their streak will break tonight.
-Status: pending review → **promoted to F-004 on 2026-02-19 (loop 14 review)**.
+Status: pending review → **approved by the human 2026-02-19** (autonomous_feature_add is false, so only they can
+green-light an idea) → **promoted to F-004** (contract written, PLANNED) by loop 14.
 
 ## 2026-02-18T10:05Z loop=5 — Blocker: friend accountability pairing (F-005)
 Type: blocker
