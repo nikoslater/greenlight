@@ -41,7 +41,7 @@ notify: "{{none|file|ntfy-url|slack-webhook}}"          # how the harness pings 
 4. **VERIFY** — anything UNVERIFIED → run its `test_commands`, save evidence, promote or demote
 5. **BUILD** — next PLANNED feature → branch → build → its tests pass → merge
 6. **HARDEN** — re-run greens toward `stable_threshold` → STABLE
-7. **ROLLOVER** — all STABLE → bump MAJOR version, demote all to UNVERIFIED, full retest
+7. **ROLLOVER** — all STABLE and version still 0.x → bump to v1.0.0, demote all to UNVERIFIED, full retest (one-time v1.0 milestone; never fires again at ≥1.0)
 8. **IDEATE** — nothing pending → file ≤3 ideas in DECISIONS (build one only if `autonomous_feature_add: true`)
 9. **DONE** — all STABLE + §4 fully checked + fresh UI evidence + no pending ideas → set `greenlight: "yes"` and `status: COMPLETE`, write `greenlight/state/STOP`, and output only: "GREENLIGHT ACHIEVED — the app is finished. Stop the loop and review your app."
 
