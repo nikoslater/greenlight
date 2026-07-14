@@ -1,7 +1,7 @@
 ---
 project: "{{PROJECT_NAME}}"
 one_liner: "{{ONE_LINE_DESCRIPTION}}"
-version: "0.1.0"               # bump on every loop that changes the app, so a LEDGER line names the version that broke a feature: MINOR when a BUILD merges a feature (0.2.0 → 0.3.0) · PATCH when a fix lands (rungs 1–3) · MAJOR only at the one-time v1.0.0 ROLLOVER · VERIFY/HARDEN change no code, so the version stays put
+version: "0.1.0"               # bump on every loop that changes the app, so a LEDGER line names the version that broke a feature. Bump by what the change DID, not which rung fired: MINOR when a new registry feature merges — including one built at the SECURITY rung, e.g. adding rate limiting (0.2.0 → 0.3.0) · PATCH when the change only fixes existing behavior (regression, bug, security fix) · MAJOR only at the one-time v1.0.0 ROLLOVER · VERIFY/HARDEN change no code, so the version stays put
 status: "BOOTSTRAP"            # re-evaluate every loop from the §3 board: BOOTSTRAP = every feature still PLANNED · BUILDING = some built, some still PLANNED · HARDENING = none left PLANNED, still verifying/hardening · COMPLETE = set by the DONE rung
 greenlight: "no"               # flipped to "yes" ONLY by the DONE rung; loop does no work when "yes"
 loop_count: 0
