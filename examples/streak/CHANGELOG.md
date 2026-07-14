@@ -16,7 +16,7 @@
 - Why: **Security rung** — public routes now exist, so the last unchecked §4 item ("rate limiting on public endpoints") became actionable, and the Security rung outranks BUILD. A new registry feature merged, so it is still a minor bump
 - Touched: SEC-002 → UNVERIFIED · §4 now fully checked
 - Commits/PRs: e5518b
-- Follow-ups filed: DECISIONS — limits keyed per user, never per IP (shared NAT would 429 legitimate users)
+- Follow-ups filed: DECISIONS — authenticated routes limited per user (not per IP), so shared NAT can't 429 legitimate users; the unauthenticated magic-link route keeps its tight per-IP limit
 
 ## v0.3.0 — loop 3 — 2026-02-18T09:34Z
 - Did: verified SEC-001 and SEC-002
@@ -93,7 +93,7 @@
 - Touched: F-002, F-003, UX-001, UX-002 → PASSING (1/3)
 
 ## v1.1.0 — loop 20 — 2026-02-20T09:12Z
-- Did: built F-004 streak-break notification (19:00-local cron, idempotent one-per-day guard table) and scoped a send-only Resend key. The build moved the day-boundary math into a single shared timezone helper, which F-002 now calls too
+- Did: built F-004 streak-break notification (19:00-local cron, idempotent one-per-day guard table) and scoped a send-only Resend key. The build also folded the day-boundary math into a shared timezone helper that F-002 now calls — bundling a refactor into a feature build, which STANDARDS forbids; loop 22's postmortem records the regression that cost
 - Why: Build rung (the only PLANNED feature) · Commits: PR #14 / e88a01
 - Touched: F-004 → UNVERIFIED; F-002 → UNVERIFIED (its code changed, so it must be re-proven)
 - README updated: notifications feature + RESEND_API_KEY documented (matches .env.example)

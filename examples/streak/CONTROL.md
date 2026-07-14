@@ -46,7 +46,7 @@ notified before a streak breaks; all features STABLE, security baseline green.
 | F-002 | Streak counter | logic | Streak = consecutive calendar days with a check-in in the user's TZ, DST-safe; missing a day resets to 0 at local midnight. | unit (TZ/DST edges) |
 | F-003 | Dashboard | screen | Shows current streak (hero number) + 12-week calendar heatmap; loads <1.5s. | unit + interaction + screenshot |
 | F-004 | Streak-break notification | feature | If a user hasn't checked in by 19:00 local and their streak is ≥2, send ONE email that day via Resend; never more than one/day. | unit + integration |
-| UX-001 | Dashboard edge states | ux | Empty (new-user welcome + single CTA), loading skeleton, offline check-in error with auto-retry — all per DESIGN.md. | interaction + screenshot |
+| UX-001 | Dashboard edge states | ux | Empty (new-user welcome + single CTA), loading skeleton, offline check-in error with auto-retry — all per DESIGN.md. Min supported width 360px; the heatmap scrolls horizontally below that rather than overflowing. | interaction + screenshot |
 | UX-002 | Auth edge states | ux | Expired/used magic link shows friendly one-tap resend screen; invalid email shows inline validation. | interaction + screenshot |
 | F-005 | Friend pairing | feature | BLOCKED — contract to be written after human decides invite model + partner visibility. | (spec first) |
 | F-006 | Password login | security | RETIRED — replaced by SEC-001. | — |

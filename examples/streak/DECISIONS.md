@@ -27,7 +27,7 @@ explicit — never hand-roll password hashing or session crypto — and email is
 Call: email magic link (SEC-001), single-use tokens with 10-min expiry, httpOnly + SameSite cookies.
 Consequence: retire F-006 entirely — less attack surface, no hash storage.
 
-## 2026-02-18T09:15Z loop=2 — Rate limits are keyed per user, never per IP
+## 2026-02-18T09:15Z loop=2 — Rate limits: per-IP on the unauthenticated route, per-user on authenticated routes
 Type: security
 Context: the Security rung fired as soon as public routes existed. The obvious implementation —
 5/min per IP on everything — would 429 legitimate users behind shared NAT (offices, mobile carriers)
@@ -75,9 +75,12 @@ construction, not by timing. Send failures log the Resend error ID, never the us
 ## 2026-02-20T10:30Z loop=22 — Postmortem: the shared timezone helper broke F-002
 Type: decision
 Context: the F-004 build (v1.1.0) needed the day boundary for its 19:00-local cron and pulled F-002's
-inline date math into one shared helper — a sensible de-duplication that quietly switched the cut-off
-to UTC midnight. F-002 was demoted to UNVERIFIED because its code changed, the next Verify loop caught
-the DST spring-forward double-count, and the LEDGER named v1.1.0 as the break version.
+inline date math into one shared helper *in the same change* — which STANDARDS forbids ("never refactor
+and add features in the same change"). That bundled refactor quietly switched the cut-off to UTC
+midnight. F-002 was demoted to UNVERIFIED because its code changed, the next Verify loop caught the DST
+spring-forward double-count, and the LEDGER named v1.1.0 as the break version.
 Call: the helper takes an explicit timezone and cuts days at local midnight; both callers pass the
-user's TZ. Lesson logged: a refactor that touches a feature's code is a change to that feature — it is
-re-proven before anything else advances, which is what turned a silent bug into a caught one.
+user's TZ. Lesson logged: this is exactly the regression that "never refactor and add features in the
+same change" prevents — the clean sequence was a separate refactor loop (extract the helper, re-prove
+F-002) *before* building F-004. Bundling them is what let a silent bug in; demoting a feature whose
+code changed is what caught it before DONE.
