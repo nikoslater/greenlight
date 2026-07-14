@@ -76,5 +76,6 @@ notified before a streak breaks; all features STABLE, security baseline green.
 ## 5. Next Action
 **→ HARDEN: re-run F-003 + UX-001 (pass 3/3 → STABLE), then harden F-004 (needs 2 more
 passes; verify the one-email-per-day guard across a simulated 2-day window). F-005 stays
-BLOCKED awaiting the human's invite-model decision. Once all STABLE: DONE rung → flip
-`greenlight: "yes"`.**
+BLOCKED awaiting the human's invite-model decision — BLOCKED is not STABLE, so it holds the
+DONE rung: even with everything else STABLE the loop cannot greenlight until the human
+answers in DECISIONS and F-005 is built to STABLE or RETIRED.**

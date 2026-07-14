@@ -108,4 +108,4 @@
 ## v1.2.2 — loop 24 — 2026-02-20T11:42Z
 - Did: verified F-004 — exactly one email on simulated at-risk day; zero when checked in or streak <2
 - Why: Verify rung · Touched: F-004 → PASSING (1/3)
-- Next: harden F-003/UX-001/F-004 to STABLE → DONE rung → greenlight
+- Next: harden F-003/UX-001/F-004 to STABLE; F-005 stays BLOCKED and holds the DONE rung until the human answers
