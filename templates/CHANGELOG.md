@@ -16,9 +16,9 @@ Format:
 
 ---
 
-## v0.1.0 — loop 1 — 2026-01-01T00:00:00Z
+## v0.1.0 — loop 0 — 2026-01-01T00:00:00Z
 - Did: scaffolded repo, wired Security Baseline, added Playwright smoke harness
-- Why: BOOTSTRAP rung 0
-- Touched: SEC-001 → UNVERIFIED
+- Why: bootstrap — written before the first loop; the ladder has no rung for scaffolding (its rungs are 1-9) and bootstrap builds no features
+- Touched: — (registry seeded; every feature PLANNED)
 - Commits/PRs: abc123
 - Follow-ups filed: threat model in DECISIONS.md

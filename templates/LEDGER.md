@@ -14,5 +14,5 @@ Format:
 
 <!-- APPEND BELOW. Example rows: -->
 
-2026-01-01T00:00:00Z | loop=1 | v=0.1.0 | SEC-001 | UNVERIFIED | auth scaffolded, not tested | commit abc123
-2026-01-01T00:05:00Z | loop=2 | v=0.1.0 | SEC-001 | PASSING | login/logout unit tests pass | greenlight/state/evidence/sec-001-l2.txt
+2026-01-01T00:00:00Z | loop=1 | v=0.2.0 | SEC-001 | UNVERIFIED | auth built at the BUILD rung (new feature merged → minor bump), not tested | commit abc123
+2026-01-01T00:05:00Z | loop=2 | v=0.2.0 | SEC-001 | PASSING | login/logout unit tests pass | greenlight/state/evidence/sec-001-l2.txt

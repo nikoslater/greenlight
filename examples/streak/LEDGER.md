@@ -5,22 +5,22 @@
 
 ---
 
-2026-02-18T09:02Z | loop=1  | v=0.1.0 | SEC-001 | UNVERIFIED | magic-link auth scaffolded, untested | commit 4a1c9e
-2026-02-18T09:15Z | loop=2  | v=0.1.0 | SEC-001 | PASSING | login/logout + token-expiry unit tests pass | greenlight/state/evidence/sec-001-l2.txt
-2026-02-18T09:15Z | loop=2  | v=0.1.0 | F-006  | RETIRED | password login retired for magic link | see DECISIONS 09:15
-2026-02-18T09:34Z | loop=3  | v=0.2.0 | F-001  | UNVERIFIED | daily check-in flow built, PR #7 merged | commit 8d22f1
-2026-02-18T09:48Z | loop=4  | v=0.2.0 | F-001  | PASSING | happy path + idempotent same-day check-in | greenlight/state/evidence/f-001-l4.txt
-2026-02-18T10:05Z | loop=5  | v=0.3.0 | F-002  | UNVERIFIED | streak counter built | commit b90a30
-2026-02-18T10:19Z | loop=6  | v=0.3.0 | F-002  | PASSING | consecutive-day calc, DST + TZ edge tests pass | greenlight/state/evidence/f-002-l6.txt
-2026-02-18T10:41Z | loop=7  | v=0.4.0 | F-003  | UNVERIFIED | dashboard w/ streak + calendar heatmap built | commit c714aa
-2026-02-18T11:03Z | loop=8  | v=0.4.0 | F-003  | PASSING | renders correctly, layout screenshot clean | greenlight/state/evidence/f-003-l8.png
-2026-02-18T11:20Z | loop=9  | v=0.4.0 | SEC-001 | PASSING | harden re-run (pass 2/3) | greenlight/state/evidence/sec-001-l9.txt
-2026-02-18T11:20Z | loop=9  | v=0.4.0 | F-003  | PASSING | harden re-run, layout screenshot clean (pass 2/3) | greenlight/state/evidence/f-003-l9.png
-2026-02-18T11:38Z | loop=10 | v=0.4.0 | SEC-001 | STABLE | 3 consecutive passes → STABLE | greenlight/state/evidence/sec-001-l10.txt
-2026-02-18T11:38Z | loop=10 | v=0.4.0 | F-003  | STABLE | 3 consecutive passes → STABLE | greenlight/state/evidence/f-003-l10.png
-2026-02-18T11:38Z | loop=10 | v=0.4.0 | F-001  | PASSING | harden re-run (pass 2/3) | greenlight/state/evidence/f-001-l10.txt
-2026-02-18T11:55Z | loop=11 | v=0.4.0 | F-001  | STABLE | 3 consecutive passes → STABLE | greenlight/state/evidence/f-001-l11.txt
-2026-02-18T11:55Z | loop=11 | v=0.4.0 | F-002  | STABLE | 3 consecutive passes → STABLE | greenlight/state/evidence/f-002-l11.txt
+2026-02-18T09:02Z | loop=1  | v=0.2.0 | SEC-001 | UNVERIFIED | magic-link auth built, untested | commit 4a1c9e
+2026-02-18T09:15Z | loop=2  | v=0.2.0 | SEC-001 | PASSING | login/logout + token-expiry unit tests pass | greenlight/state/evidence/sec-001-l2.txt
+2026-02-18T09:15Z | loop=2  | v=0.2.0 | F-006  | RETIRED | password login retired for magic link | see DECISIONS 09:15
+2026-02-18T09:34Z | loop=3  | v=0.3.0 | F-001  | UNVERIFIED | daily check-in flow built, PR #7 merged | commit 8d22f1
+2026-02-18T09:48Z | loop=4  | v=0.3.0 | F-001  | PASSING | happy path + idempotent same-day check-in | greenlight/state/evidence/f-001-l4.txt
+2026-02-18T10:05Z | loop=5  | v=0.4.0 | F-002  | UNVERIFIED | streak counter built | commit b90a30
+2026-02-18T10:19Z | loop=6  | v=0.4.0 | F-002  | PASSING | consecutive-day calc, DST + TZ edge tests pass | greenlight/state/evidence/f-002-l6.txt
+2026-02-18T10:41Z | loop=7  | v=0.5.0 | F-003  | UNVERIFIED | dashboard w/ streak + calendar heatmap built | commit c714aa
+2026-02-18T11:03Z | loop=8  | v=0.5.0 | F-003  | PASSING | renders correctly, layout screenshot clean | greenlight/state/evidence/f-003-l8.png
+2026-02-18T11:20Z | loop=9  | v=0.5.0 | SEC-001 | PASSING | harden re-run (pass 2/3) | greenlight/state/evidence/sec-001-l9.txt
+2026-02-18T11:20Z | loop=9  | v=0.5.0 | F-003  | PASSING | harden re-run, layout screenshot clean (pass 2/3) | greenlight/state/evidence/f-003-l9.png
+2026-02-18T11:38Z | loop=10 | v=0.5.0 | SEC-001 | STABLE | 3 consecutive passes → STABLE | greenlight/state/evidence/sec-001-l10.txt
+2026-02-18T11:38Z | loop=10 | v=0.5.0 | F-003  | STABLE | 3 consecutive passes → STABLE | greenlight/state/evidence/f-003-l10.png
+2026-02-18T11:38Z | loop=10 | v=0.5.0 | F-001  | PASSING | harden re-run (pass 2/3) | greenlight/state/evidence/f-001-l10.txt
+2026-02-18T11:55Z | loop=11 | v=0.5.0 | F-001  | STABLE | 3 consecutive passes → STABLE | greenlight/state/evidence/f-001-l11.txt
+2026-02-18T11:55Z | loop=11 | v=0.5.0 | F-002  | STABLE | 3 consecutive passes → STABLE | greenlight/state/evidence/f-002-l11.txt
 --- v1.0.0 MAJOR ROLLOVER (loop 12): all STABLE/PASSING demoted to UNVERIFIED, full retest begins ---
 2026-02-19T08:30Z | loop=12 | v=1.0.0 | SEC-001 | UNVERIFIED | rollover demotion | —
 2026-02-19T08:30Z | loop=12 | v=1.0.0 | F-001  | UNVERIFIED | rollover demotion | —

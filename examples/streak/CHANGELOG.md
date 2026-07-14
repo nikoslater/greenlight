@@ -4,50 +4,50 @@
 
 ---
 
-## v0.1.0 — loop 1 — 2026-02-18T09:02Z
-- Did: scaffolded repo, wired Security Baseline, added Playwright smoke harness; built magic-link auth (SEC-001)
-- Why: BOOTSTRAP rung 0
+## v0.2.0 — loop 1 — 2026-02-18T09:02Z
+- Did: built magic-link auth (SEC-001) — the repo scaffold, Security Baseline and Playwright harness came from bootstrap, before this loop
+- Why: Build rung (first PLANNED feature); a new registry feature merged, so minor bump 0.1.0 → 0.2.0
 - Touched: SEC-001 → UNVERIFIED
 - Commits/PRs: 4a1c9e
 - Follow-ups: threat model filed in DECISIONS
 
-## v0.1.0 — loop 2 — 2026-02-18T09:15Z
+## v0.2.0 — loop 2 — 2026-02-18T09:15Z
 - Did: verified SEC-001; formally retired password login
 - Why: Verify rung; decision to drop F-006
 - Touched: SEC-001 → PASSING, F-006 → RETIRED
 - Commits/PRs: —
 
-## v0.2.0 — loop 3 — 2026-02-18T09:34Z
+## v0.3.0 — loop 3 — 2026-02-18T09:34Z
 - Did: built daily check-in flow (F-001), idempotent per day
 - Why: Build rung (highest-priority PLANNED)
 - Touched: F-001 → UNVERIFIED
 - Commits/PRs: PR #7 / 8d22f1
 
-## v0.2.0 — loop 4 — 2026-02-18T09:48Z
+## v0.3.0 — loop 4 — 2026-02-18T09:48Z
 - Did: verified F-001 happy path + same-day idempotency
 - Touched: F-001 → PASSING
 
-## v0.3.0 — loop 5 — 2026-02-18T10:05Z
+## v0.4.0 — loop 5 — 2026-02-18T10:05Z
 - Did: built streak counter (F-002)
 - Touched: F-002 → UNVERIFIED · Commits: b90a30
 - Follow-ups: idea F-004 (notify) + blocker F-005 (pairing) filed
 
-## v0.3.0 — loop 6 — 2026-02-18T10:19Z
+## v0.4.0 — loop 6 — 2026-02-18T10:19Z
 - Did: verified F-002 incl. DST/timezone edge cases · Touched: F-002 → PASSING
 
-## v0.4.0 — loop 7 — 2026-02-18T10:41Z
+## v0.5.0 — loop 7 — 2026-02-18T10:41Z
 - Did: built dashboard (F-003) with streak + calendar heatmap · Touched: F-003 → UNVERIFIED · Commits: c714aa
 
-## v0.4.0 — loop 8 — 2026-02-18T11:03Z
+## v0.5.0 — loop 8 — 2026-02-18T11:03Z
 - Did: verified F-003, captured clean layout screenshot · Touched: F-003 → PASSING
 
-## v0.4.0 — loop 9 — 2026-02-18T11:20Z
+## v0.5.0 — loop 9 — 2026-02-18T11:20Z
 - Did: harden SEC-001 and F-003 (pass 2/3 each) · Why: Harden rung
 
-## v0.4.0 — loop 10 — 2026-02-18T11:38Z
+## v0.5.0 — loop 10 — 2026-02-18T11:38Z
 - Did: SEC-001 and F-003 → STABLE (3 passes each); F-001 harden (pass 2/3)
 
-## v0.4.0 — loop 11 — 2026-02-18T11:55Z
+## v0.5.0 — loop 11 — 2026-02-18T11:55Z
 - Did: F-001 and F-002 → STABLE · Every live feature now STABLE — rollover unlocked
 
 ## v1.0.0 — loop 12 — 2026-02-19T08:30Z
