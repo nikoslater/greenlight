@@ -34,7 +34,8 @@ Call: mark F-005 BLOCKED. Needs human: (a) invite mechanism, (b) partner visibil
 
 ## 2026-02-19T08:30Z loop=12 — Major rollover to v1.0.0
 Type: decision
-Context: SEC-001, F-001, F-002 all hit STABLE and the app is feature-complete for the core loop.
+Context: SEC-001, F-001, F-002 and F-003 have all hit STABLE — the rollover rung needs every live
+feature STABLE, not merely PASSING, so hardening F-003 first (loops 9-10) was the higher rung.
 Call: bump to v1.0.0 as a full-retest milestone. Per the rollover rule, demote every green feature to
 UNVERIFIED and retest from scratch — cheap insurance before layering new work on top.
 

@@ -42,13 +42,13 @@
 - Did: verified F-003, captured clean layout screenshot · Touched: F-003 → PASSING
 
 ## v0.4.0 — loop 9 — 2026-02-18T11:20Z
-- Did: harden SEC-001 (pass 2/3) · Why: Harden rung
+- Did: harden SEC-001 and F-003 (pass 2/3 each) · Why: Harden rung
 
 ## v0.4.0 — loop 10 — 2026-02-18T11:38Z
-- Did: SEC-001 → STABLE (3 passes); F-001 harden (pass 2/3)
+- Did: SEC-001 and F-003 → STABLE (3 passes each); F-001 harden (pass 2/3)
 
 ## v0.4.0 — loop 11 — 2026-02-18T11:55Z
-- Did: F-001 and F-002 → STABLE · Core loop feature-complete
+- Did: F-001 and F-002 → STABLE · Every live feature now STABLE — rollover unlocked
 
 ## v1.0.0 — loop 12 — 2026-02-19T08:30Z
 - Did: MAJOR ROLLOVER milestone — demoted all green features to UNVERIFIED, began full retest

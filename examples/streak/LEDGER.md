@@ -15,7 +15,9 @@
 2026-02-18T10:41Z | loop=7  | v=0.4.0 | F-003  | UNVERIFIED | dashboard w/ streak + calendar heatmap built | commit c714aa
 2026-02-18T11:03Z | loop=8  | v=0.4.0 | F-003  | PASSING | renders correctly, layout screenshot clean | greenlight/state/evidence/f-003-l8.png
 2026-02-18T11:20Z | loop=9  | v=0.4.0 | SEC-001 | PASSING | harden re-run (pass 2/3) | greenlight/state/evidence/sec-001-l9.txt
+2026-02-18T11:20Z | loop=9  | v=0.4.0 | F-003  | PASSING | harden re-run, layout screenshot clean (pass 2/3) | greenlight/state/evidence/f-003-l9.png
 2026-02-18T11:38Z | loop=10 | v=0.4.0 | SEC-001 | STABLE | 3 consecutive passes → STABLE | greenlight/state/evidence/sec-001-l10.txt
+2026-02-18T11:38Z | loop=10 | v=0.4.0 | F-003  | STABLE | 3 consecutive passes → STABLE | greenlight/state/evidence/f-003-l10.png
 2026-02-18T11:38Z | loop=10 | v=0.4.0 | F-001  | PASSING | harden re-run (pass 2/3) | greenlight/state/evidence/f-001-l10.txt
 2026-02-18T11:55Z | loop=11 | v=0.4.0 | F-001  | STABLE | 3 consecutive passes → STABLE | greenlight/state/evidence/f-001-l11.txt
 2026-02-18T11:55Z | loop=11 | v=0.4.0 | F-002  | STABLE | 3 consecutive passes → STABLE | greenlight/state/evidence/f-002-l11.txt
