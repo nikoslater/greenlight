@@ -24,7 +24,9 @@ while true; do
     break
   fi
 
+  echo "[$(date '+%H:%M:%S')] iteration started — MID-FLIGHT, don't touch the repo"
   claude -p "$(cat "$PROMPT")" --dangerously-skip-permissions || notify "Self-loop iteration errored — check output"
+  echo "[$(date '+%H:%M:%S')] iteration finished — safe window (sleeping ${INTERVAL}s)"
 
   [ -f "$PERFECT" ] && continue
   sleep "$INTERVAL"
