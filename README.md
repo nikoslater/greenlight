@@ -88,6 +88,23 @@ You're handing an autonomous agent the keys to the folder. On a branch, `main` s
 untouched no matter what; when you're happy with the result you merge, and if a run ever
 goes sideways you throw the branch away and lose nothing.
 
+**Already a project on GitHub?** If your folder is an existing repo that's already connected
+to GitHub (it has an `origin` remote and a `main` with history), skip the `git init` and the
+"create main" commit above — `main` already exists. Just branch off it, and after the loop
+runs, push that branch to your existing repo and open a Pull Request so you can review
+everything before it touches `main`:
+
+```bash
+git checkout -b greenlight-build        # branch off your existing main
+# ...install Greenlight, bootstrap, and run the loop on this branch...
+git push -u origin greenlight-build     # pushes the branch to your existing GitHub repo
+```
+
+Then on GitHub, open a Pull Request from `greenlight-build` into `main`. All of Greenlight's
+commits stay isolated on the branch — nothing reaches your `main` until you merge the PR. If
+the loop is still running, pushing is safe during a safe window (see below); push again
+whenever you want the branch on GitHub updated.
+
 ---
 
 ## Part 2 — Bootstrap (one interactive conversation)
