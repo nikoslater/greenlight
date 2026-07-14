@@ -42,24 +42,34 @@ Priority ladder (do the FIRST that applies, then stop and log):
 1. Any mechanical-check failure from §2.
 2. A genuine correctness bug: an instruction that contradicts another file, is impossible to follow, or would make a fresh agent do the wrong thing.
 3. A genuine clarity defect you can NAME in one sentence: an instruction a careful reader would misinterpret. (Not "could be nicer" — a real ambiguity.)
+4. CONSOLIDATE (only when rungs 1–3 yield nothing): one rule or section that has grown so
+   dense a fresh agent is likely to misread it. The product's own standard — "verbose context
+   files make agents worse" — makes density a defect, but only under ALL of these conditions:
+   the rewrite is strictly shorter; you log a behavior trace showing every case the old text
+   covered is handled identically by the new text; you never re-consolidate text a previous
+   loop already consolidated (check IMPROVEMENTS.md). If you cannot prove equivalence, the
+   text is not eligible — fall through to STOP rather than risk changing semantics.
 
-**If you cannot name a concrete defect at rungs 1–3: you are done.** Create `.selfloop/PERFECT`,
+**If you cannot name a concrete defect at rungs 1–4: you are done.** Create `.selfloop/PERFECT`,
 append a final `.selfloop/IMPROVEMENTS.md` line, and reply with the PERFECT message from §0.
 Do not invent work.
 
 ## Anti-drift rules (these override the urge to change things)
-- One fix per loop. The smallest change that resolves the named defect.
+- One defect per loop, smallest change that resolves it — with one exception: if VERIFYING
+  your fix exposes a second defect in the SAME rule or file, fix and log both now rather than
+  leaving a known-broken intermediate state for a future loop. Never batch unrelated defects.
 - NEVER rewrite, reword, or "polish" a file that has no named defect. Working prose is done prose.
 - A change is only allowed if you can state the concrete defect it fixes in `.selfloop/IMPROVEMENTS.md`. No defect, no edit.
 - Do not add features, files, or sections unless a §2/§3 defect requires it.
-- If your only complaint is taste, that is NOT a defect. Prefer STOP over churn.
+- If your only complaint is taste, that is NOT a defect. Prefer STOP over churn. (Density
+  that risks misreading is rung 4's business, and only under its proof conditions.)
 - Never undo a fix a previous loop logged as done unless it demonstrably broke something (say what).
 
 ## 4. Verify
 Re-run the relevant §2 check(s) and confirm your fix resolves the failure without creating a new one.
 
 ## 5. Log (mandatory, append-only)
-Append one line to `.selfloop/IMPROVEMENTS.md`:
+Append one line to `.selfloop/IMPROVEMENTS.md` (one line PER defect, if this loop fixed two):
 `[ISO-timestamp] loop=N | defect: <one sentence> | fix: <what changed, which file> | verified: <how>`
 Then commit: `git add -A && git commit -m "loop N: <short defect>"`.
 
