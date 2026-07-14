@@ -37,7 +37,7 @@ notify: "{{none|file|ntfy-url|slack-webhook}}"          # how the harness pings 
 
 1. **SECURITY** — unchecked §4 item or security regression
 2. **REGRESSION** — a feature that was PASSING/STABLE is now BROKEN → find the break version in LEDGER, read that CHANGELOG entry, fix from that lead
-3. **BROKEN** — any other failing feature (fix, or mark BLOCKED with the exact human ask in DECISIONS)
+3. **BROKEN / UNBLOCK** — any other failing feature (fix, or mark BLOCKED with the exact human ask in DECISIONS). Also: a BLOCKED feature whose DECISIONS ask the human has now answered → apply the answer this loop (write its Contract and set it PLANNED for rung 5 to build, or mark it RETIRED), clearing BLOCKED. Only an unanswered ask keeps a feature BLOCKED
 4. **VERIFY** — anything UNVERIFIED → run its `test_commands`, save evidence, promote or demote
 5. **BUILD** — next PLANNED feature → branch → build → its tests pass → merge
 6. **HARDEN** — re-run greens toward `stable_threshold` → STABLE
