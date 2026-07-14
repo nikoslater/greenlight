@@ -4,7 +4,7 @@
 
 ---
 
-## 2026-02-18T09:00Z loop=1 — Threat model (5 lines)
+## 2026-02-18T09:00Z loop=0 — Threat model (5 lines)
 Type: security
 1. Users = individuals tracking personal habits; attackers = credential stuffers, scrapers, spammers.
 2. Sensitive data = email addresses + check-in history (behavioral). No payments, no PII beyond email.

@@ -5,11 +5,10 @@
 ---
 
 ## v0.2.0 — loop 1 — 2026-02-18T09:02Z
-- Did: built magic-link auth (SEC-001) — the repo scaffold, Security Baseline and Playwright harness came from bootstrap, before this loop
-- Why: Build rung (first PLANNED feature); a new registry feature merged, so minor bump 0.1.0 → 0.2.0
+- Did: built magic-link auth (SEC-001) — the repo scaffold, Security Baseline, threat model (DECISIONS loop=0) and Playwright harness all came from bootstrap, before this loop
+- Why: Build rung (first PLANNED feature); a new registry feature merged, so minor bump 0.1.0 → 0.2.0. The threat model was already filed, so §4 had no actionable unchecked item and the Security rung did not fire
 - Touched: SEC-001 → UNVERIFIED
 - Commits/PRs: 4a1c9e
-- Follow-ups: threat model filed in DECISIONS
 
 ## v0.2.0 — loop 2 — 2026-02-18T09:15Z
 - Did: verified SEC-001; formally retired password login
