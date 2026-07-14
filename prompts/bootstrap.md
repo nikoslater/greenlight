@@ -54,7 +54,7 @@ scope/security risks in plain language, and propose a lean v1 list vs later. **W
 
 ### B3. Scaffold (after "go")
 1. **Stack & packages — pick from `STACKS.md`.** Use its default for the profile unless there is a specific, recorded reason to deviate (record it in DECISIONS). Verify every package exists on the public registry and is maintained. Fewest dependencies wins; prefer platform/stdlib capabilities (STANDARDS "Write less code"). List the exact initial dependency set with a one-line reason each.
-2. **Design brief — write `DESIGN.md` (1 page).** Personality in 3 adjectives, a real typography choice (not the default sans everyone gets), a small palette with one clear hierarchy, spacing scale, and a short "never" list: no blue→purple gradients, no glow effects, no beige-default, no decorative emoji, no equal-volume neon. Specify the edge states (empty, loading, error, offline) as designed screens, not afterthoughts — these are what separate real apps from vibe-coded demos.
+2. **Design brief — if the app has a UI, write `DESIGN.md` (1 page)** (a headless CLI/API/library has no UI — skip it, and record `surface` in the Profile so the loop's UI rungs stay quiet). Personality in 3 adjectives, a real typography choice (not the default sans everyone gets), a small palette with one clear hierarchy, spacing scale, and a short "never" list: no blue→purple gradients, no glow effects, no beige-default, no decorative emoji, no equal-volume neon. Specify the edge states (empty, loading, error, offline) as designed screens, not afterthoughts — these are what separate real apps from vibe-coded demos.
 3. **Registry with Contracts:** write a one-to-two sentence behavioral Contract for every feature — exact expected behavior including the tricky part (timezones, duplicates, limits). These contracts are the permanent spec the loop builds and tests against, so a fresh session can never misinterpret a feature. Use stable IDs (F-### features, SEC-### security, UX-### edge-state/design items). Every UI feature's required tests include an interaction pass (click/open/submit) and a screenshot at mobile + desktop widths. Add UX-### items for empty/loading/error states of each major screen.
 4. **Generate:** CONTROL.md (Profile filled, `greenlight: "no"`, Charter, Registry, board all PLANNED, exact runnable `test_commands`, first Next Action), the three seeded ledgers (threat model in DECISIONS; every assumption and stack justification recorded), README.md for the app (layperson install/run steps), `.env.example`, `greenlight/state/evidence/`, folder tree with module boundaries + `tests/` mirroring the registry + the test runner from STACKS.md wired to `test_commands` (Playwright for interaction tests and screenshots only if the app has a UI; a CLI/API profile uses its own runner, e.g. pytest or go test).
 5. Don't build features — that's the loop's job. Finish with a plain-language summary: what will be built, in what order, and what I should double-check.
@@ -64,8 +64,8 @@ scope/security risks in plain language, and propose a lean v1 list vs later. **W
 copied across unchanged. `CONTROL.md`, `LEDGER.md`, `DECISIONS.md` and `CHANGELOG.md` are the files
 you fill/seed above: keep each one's structure — in particular CONTROL.md's §0 Loop rules and
 front-matter keys verbatim, since the loop reads its priority ladder from there — and replace only
-the `{{...}}` placeholders and the sample rows/entries with real ones. (`DESIGN.md` and the app's
-README have no template; you write those.) Keep everything you write short and specific — verbose
+the `{{...}}` placeholders and the sample rows/entries with real ones. (`DESIGN.md` — for a UI app
+only — and the app's README have no template; you write those.) Keep everything you write short and specific — verbose
 context files make agents worse.
 
 === MY IDEA DUMP (new projects only) ===

@@ -154,7 +154,8 @@ Watch progress from a second terminal tab:
 ```bash
 git log --oneline -10
 ```
-Every iteration ends in a commit — this is the loop's diary.
+Every iteration that does work ends in a commit — this is the loop's diary. (The one
+exception: a loop with nothing to do but wait for an answer from you makes no commit.)
 
 ```bash
 cat greenlight/CONTROL.md
