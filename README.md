@@ -61,32 +61,44 @@ them). And paste one command at a time until you're comfortable.
 
 ## Part 1 — Install Greenlight into your project (once per project)
 
+Greenlight commits its work with git on every iteration, so your project must be a git repo on
+a working branch before you start. This is **required, not optional** — it's the step people
+most often miss (an unzipped download or a fresh folder isn't a git repo yet). It works the
+same whether your folder is a brand-new idea, an unzipped download, or an existing codebase.
+Run these from your project folder, **top to bottom, all four**:
+
 ```bash
-cd your-project          # new empty folder or existing codebase — both work
-git init                 # only if it isn't a git repo yet
+cd your-project
+
+# 1. Make it a git repo (safe even if it already is one — then it does nothing):
+git init
+
+# 2. Install Greenlight:
 curl -fsSL https://raw.githubusercontent.com/nikoslater/greenlight/main/install.sh | bash
+
+# 3. Commit once (this creates `main`)...
+git add -A && git commit -m "Set up Greenlight"
+
+# 4. ...then branch — the loop does ALL its work here, never on main:
+git checkout -b greenlight-build
+```
+
+**Don't skip step 4.** You're handing an autonomous agent the keys to the folder. On
+`greenlight-build`, your `main` stays untouched no matter what — when you're happy you merge,
+and if a run goes sideways you throw the branch away and lose nothing. (You do **not** need a
+GitHub account or any connection for this — git runs entirely on your computer. Putting it on
+GitHub is optional and comes later, under backup below.)
+
+**If step 3 errors with "Please tell me who you are,"** git just needs your identity once (the
+loop can't commit without it). Set it, then re-run steps 3 and 4:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
 ```
 
 (This installs from `nikoslater/greenlight`. Forking Greenlight to publish your own copy?
 Replace `nikoslater` in the URL — and in `install.sh`'s `REPO_RAW` — with your account.)
-
-**Strongly recommended: run Greenlight on a branch, not on `main`.** First make sure `main`
-actually exists to return to later — a freshly `git init`ed repo has no commits and no
-branch until you make one:
-
-```bash
-git add -A && git commit -m "Set up Greenlight"   # first commit — creates `main`
-git checkout -b greenlight-build                  # all the loop's work happens here
-```
-
-(First time using git on this machine? If that commit errors with "Please tell me who you
-are," set your identity once and re-run it — the loop commits every iteration, so this must
-work: `git config --global user.name "Your Name"` and
-`git config --global user.email "you@example.com"`.)
-
-You're handing an autonomous agent the keys to the folder. On a branch, `main` stays
-untouched no matter what; when you're happy with the result you merge, and if a run ever
-goes sideways you throw the branch away and lose nothing.
 
 **Already a project on GitHub?** If your folder is an existing repo that's already connected
 to GitHub (it has an `origin` remote and a `main` with history), skip the `git init` and the
