@@ -82,7 +82,9 @@ failure, or major rollover. When it hits the threshold, status becomes STABLE.*
 - [ ] No stack traces, internal errors, or PII in user-facing responses or logs
 - [ ] Rate limiting on public endpoints; least-privilege keys/DB user
 - [ ] 5-line threat model in DECISIONS.md
-*(skip N/A items per Profile — e.g. no DB rules when `persistence: none` — and note the skip)*
+*(An item the Profile makes N/A — e.g. no DB rules when `persistence: none` — counts as satisfied:
+check its box and append "N/A: <why>", so the DONE rung's "§4 fully checked" gate stays reachable.
+Never check a box that DOES apply and isn't done — leave those unchecked for the SECURITY rung.)*
 
 ## 5. Next Action (exactly one; rewritten every loop)
 **→ {{the single concrete next step}}**
