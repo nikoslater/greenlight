@@ -222,6 +222,23 @@ The loop has stopped itself: every feature stable, security checklist green, UI 
 real clicks. Try the app yourself, then fold the work into main:
 `git checkout main` then `git merge greenlight-build` then `git push`
 
+**...I merged my branch into `main` on GitHub (via a Pull Request) — how do I update my local `main`?**
+The merge happened on GitHub's copy, so your local `main` is now behind it. Switch to `main`
+and pull the merged history down:
+
+```bash
+git checkout main
+git pull origin main
+```
+
+That fast-forwards your local `main` to match. The branch is finished now, so you can clean it
+up locally and on GitHub if you like:
+
+```bash
+git branch -d greenlight-build              # delete it locally
+git push origin --delete greenlight-build   # and on GitHub
+```
+
 **...an iteration did something I don't like?**
 Wait for the safe window, Ctrl-C, find the commit in `git log --oneline`, and undo just it:
 `git revert <commit-id>`. Then note what you didn't like in `greenlight/DECISIONS.md` so
