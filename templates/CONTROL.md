@@ -22,7 +22,6 @@ test_commands:                                          # exact, copy-pasteable;
   interaction: "{{e.g. npx playwright test ui — required if the app has a UI}}"
 autonomous_feature_add: false     # true = loop may build its own ideas; false = ideas wait for you
 stable_threshold: 3               # consecutive passes → STABLE
-notify: "{{none|file|ntfy-url|slack-webhook}}"          # records the ping channel you want at COMPLETE/BLOCKED; the runner does not read this key — edit notify() in greenlight/run-loop.sh to match it (it ships with desktop notifications)
 ---
 
 # CONTROL.md — source of truth for {{PROJECT_NAME}}
@@ -36,7 +35,7 @@ notify: "{{none|file|ntfy-url|slack-webhook}}"          # records the ping chann
 **Do exactly ONE productive action per loop**, then log it. Pick the FIRST rung that applies.
 (Two kinds of human-handoff bookkeeping do not by themselves consume a loop's productive
 action — do them as you notice them, then take the first work rung that applies: marking a
-feature BLOCKED with its ask in DECISIONS + `greenlight/state/NEEDS_HUMAN`; and applying an
+feature BLOCKED with its ask in DECISIONS (and repeating the ask to the human); and applying an
 answer already sitting in DECISIONS — unblocking a feature or promoting an approved idea to a
 PLANNED registry entry, both per rung 3.)
 
@@ -48,14 +47,15 @@ PLANNED registry entry, both per rung 3.)
 6. **HARDEN** — re-run greens toward `stable_threshold` → STABLE
 7. **ROLLOVER** — all STABLE and version still 0.x → bump to v1.0.0, demote every green (STABLE/PASSING) feature to UNVERIFIED, full retest. RETIRED and BLOCKED features keep their status: a rollover must never resurrect a dead feature, and a BLOCKED one has no contract to retest (one-time v1.0 milestone; never fires again at ≥1.0)
 8. **IDEATE** — nothing PLANNED, UNVERIFIED or BROKEN (a BLOCKED feature does NOT count as pending — it waits on the human, not the loop, so IDEATE still fires alongside it) AND DECISIONS has no entry titled "IDEATE round" → file ≤3 ideas in DECISIONS as ONE entry titled exactly `IDEATE round` (that title is the marker rungs 8 and 9 both read; ideas filed ad-hoc by any other loop are NOT the round and neither arm nor satisfy this rung). Once ever: never re-arm, not even after the ideas themselves change the app (build one only if `autonomous_feature_add: true`; otherwise they sit at "pending review" for the human and do NOT block DONE)
-9. **DONE** — all STABLE + §4 fully checked + current UI evidence for every UI feature (the screenshot from its most recent pass, reflecting today's code and not invalidated by a later change; a Profile with no UI — e.g. `surface: cli` or `api` — has no UI features, so this clause is already satisfied) + the "IDEATE round" entry exists in DECISIONS → set `greenlight: "yes"` and `status: COMPLETE`, write `greenlight/state/STOP`, and output only: "GREENLIGHT ACHIEVED — the app is finished. Stop the loop and review your app."
+9. **DONE** — all STABLE + §4 fully checked + current UI evidence for every UI feature (the screenshot from its most recent pass, reflecting today's code and not invalidated by a later change; a Profile with no UI — e.g. `surface: cli` or `api` — has no UI features, so this clause is already satisfied) + the "IDEATE round" entry exists in DECISIONS → set `greenlight: "yes"` and `status: COMPLETE`, and output only: "GREENLIGHT ACHIEVED — the app is finished. Stop the loop and review your app."
 
 **Waiting state (no rung applies):** if the only thing standing between the project and DONE
 is a BLOCKED feature whose ask the human has not answered — every other live feature STABLE,
 §4 checked, the IDEATE round filed — then no rung 1–9 fires (rung 3 needs an answer, rung 9 is
-held by the BLOCKED feature). Do not manufacture an edit: re-write the pending ask to
-`greenlight/state/NEEDS_HUMAN` so the human is pinged again, change nothing else, and end the
-loop. This is the one loop that legitimately makes no change and no commit — it is waiting, not working.
+held by the BLOCKED feature). Do not manufacture an edit: restate the pending ask to the human
+in your reply, change nothing else, and stop looping — resume once they've answered by
+appending to DECISIONS. This is the one iteration that legitimately makes no change and no
+commit — it is waiting, not working.
 
 **Statuses:** `PLANNED → UNVERIFIED → PASSING → STABLE`, plus `BROKEN`, `BLOCKED` (needs human — never guess), `RETIRED`. **"All STABLE" means every live feature is STABLE — RETIRED features are dead and excluded from every count.** BLOCKED counts differently per rung: for rung 7 (ROLLOVER) a BLOCKED feature is also excluded, because it has no contract yet and so has nothing for a retest milestone to re-prove — one unanswered ask must not pin the project below v1.0 forever. For rung 9 (DONE) it is *not* excluded: a BLOCKED feature is not STABLE and holds DONE until the human answers its DECISIONS ask and rung 3 takes it to STABLE or RETIRED. Any change to a feature demotes it to UNVERIFIED until re-proven. PASSING requires passing evidence from THIS loop, saved to `greenlight/state/evidence/`. UI features additionally require a fresh screenshot reviewed for broken layout.
 

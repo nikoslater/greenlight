@@ -16,7 +16,7 @@ cards, glowing gradients, buttons that do nothing. Greenlight is a set of files 
 prompts that make the AI behave like a disciplined senior team instead.
 
 Everything Greenlight generates lives in a single `greenlight/` folder — prompts, templates,
-the working docs it produces, its runner, and runtime state (`greenlight/state/`, gitignored).
+the working docs it produces, and runtime state (`greenlight/state/`, gitignored).
 The only things it adds to your repo root are two small housekeeping touches: a couple of
 lines in `.gitignore` and a `.env.example` if you don't already have one. Your actual
 source tree stays yours.
@@ -114,8 +114,8 @@ git push -u origin greenlight-build     # pushes the branch to your existing Git
 
 Then on GitHub, open a Pull Request from `greenlight-build` into `main`. All of Greenlight's
 commits stay isolated on the branch — nothing reaches your `main` until you merge the PR. If
-the loop is still running, pushing is safe during a safe window (see below); push again
-whenever you want the branch on GitHub updated.
+the loop is still running, pushing from a second terminal tab is safe; push again whenever
+you want the branch on GitHub updated.
 
 ---
 
@@ -143,31 +143,31 @@ When it finishes its summary, type `/exit`. Your project now has its brain:
 ## Part 3 — Run the loop
 
 ```bash
-./greenlight/run-loop.sh 300
+claude "$(cat greenlight/prompts/loop.md)"
 ```
 
-Each cycle runs ONE work step (build a feature, run its tests, fix what broke, save
-evidence, commit) and then waits. The terminal narrates:
+That's the whole loop. Claude Code is itself an agentic loop, so Greenlight rides it
+natively: in one session it runs iteration after iteration — each one walks the priority
+ladder, does ONE work step (build a feature, run its tests, fix what broke, save evidence),
+commits it, narrates a one-line summary, and rolls straight into the next. You watch it work
+live in the terminal. It stops itself when the app is done (**GREENLIGHT ACHIEVED**), or
+pauses and asks you when it hits a decision only you can make.
 
-```
-[14:02:11] iteration started — MID-FLIGHT, don't edit the repo until it finishes
-[14:07:48] iteration finished — safe window (next one in 300s)
-```
-
-- The number is seconds between iterations. `300` = one step every 5 minutes, good for
-  keeping an eye on it. A small number like `15` runs back-to-back — faster progress, but
-  it burns through your usage quota quickly and you'll review the work in one pile at the
-  end instead of as it happens.
-- To pin a specific model: `ANTHROPIC_MODEL=claude-opus-4-8 ./greenlight/run-loop.sh 300`
-- The loop stops itself when the app is done ("GREENLIGHT ACHIEVED") — or stop it anytime
-  with **Ctrl-C**, ideally during a safe window.
+- To pin a specific model: `ANTHROPIC_MODEL=claude-opus-4-8 claude "$(cat greenlight/prompts/loop.md)"`
+  (or type `/model` inside the session).
+- To stop early: press **Esc** to interrupt what it's doing, or type `/exit` between
+  iterations. The files are the loop's memory, so stopping is always safe — rerun the same
+  command later and it picks up exactly where the ledgers say it left off.
+- Long runs are fine: Claude Code compacts its own context automatically, and because the
+  files are the memory, you can also just exit and relaunch anytime for a completely fresh
+  brain — it re-reads CONTROL.md and the ledgers and carries on.
 
 **Running it overnight (Mac):** the screen turning off is fine, but system sleep pauses the
-loop and can kill an in-flight iteration. Prefix the command with macOS's built-in
+session and can kill an in-flight step. Prefix the command with macOS's built-in
 `caffeinate` to keep the machine awake exactly as long as the loop runs:
 
 ```bash
-caffeinate -is ./greenlight/run-loop.sh 300
+caffeinate -is claude "$(cat greenlight/prompts/loop.md)"
 ```
 
 Keep the lid open (closing it forces sleep regardless) and stay plugged in (`-s` only
@@ -178,10 +178,11 @@ the moment the loop exits.
 
 ## While it runs — the two states that matter
 
-**MID-FLIGHT** (between "started" and "finished" lines): the agent is editing your files.
-Don't edit files, don't switch branches, don't pull. Looking is always fine.
+**WORKING** (the session is mid-step, tools firing, text streaming): the agent is editing
+your files. Don't edit files, don't switch branches, don't pull. Looking is always fine.
 
-**Safe window** (after a "finished" line): do anything — stop the loop, push, clean up.
+**WAITING** (it printed an iteration summary, or is asking you a question): do anything —
+answer it, push, clean up, or stop the loop.
 
 Watch progress from a second terminal tab:
 
@@ -189,7 +190,7 @@ Watch progress from a second terminal tab:
 git log --oneline -10
 ```
 Every iteration that does work ends in a commit — this is the loop's diary. (The one
-exception: a loop with nothing to do but wait for an answer from you makes no commit.)
+exception: an iteration with nothing to do but wait for an answer from you makes no commit.)
 
 ```bash
 cat greenlight/CONTROL.md
@@ -202,8 +203,9 @@ and the single next action.
 ## Scenarios — "what do I do when..."
 
 **...I want to pause and resume later?**
-Ctrl-C during a safe window. Resume anytime with `./greenlight/run-loop.sh 300` — the
-files are the loop's memory, so it picks up exactly where it left off, even days later.
+Type `/exit` once it's between iterations (or press Esc first to interrupt a step). Resume
+anytime with `claude "$(cat greenlight/prompts/loop.md)"` — the files are the loop's memory,
+so it picks up exactly where it left off, even days later.
 
 **...I want my progress backed up on GitHub?**
 The loop only commits locally — nothing leaves your computer on its own. If you started
@@ -220,14 +222,15 @@ time:
 git push
 ```
 
-Safe during a safe window even while the loop is running. If a Pull Request is already open
-from this branch, the push updates that PR automatically — no need to reopen it.
+Pushing is safe even while the loop is running. If a Pull Request is already open from this
+branch, the push updates that PR automatically — no need to reopen it.
 
 **...the loop says it needs ME?**
 When it hits a decision only a human can make (a secret key, a product call, a destructive
 migration) it marks the item BLOCKED, writes the exact question to `greenlight/DECISIONS.md`,
-and pings you — then keeps working on other things. Read the question, append your answer
-under it in `greenlight/DECISIONS.md`, and the next iteration unblocks.
+and tells you in the terminal — then keeps working on other things. Append your answer under
+the question in `greenlight/DECISIONS.md`, and the next iteration unblocks. (If the ask is
+the ONLY thing left, the loop stops and waits — answer, then relaunch it.)
 
 **...it says GREENLIGHT ACHIEVED?**
 The loop has stopped itself: every feature stable, security checklist green, UI verified by
@@ -252,21 +255,20 @@ git push origin --delete greenlight-build   # and on GitHub
 ```
 
 **...an iteration did something I don't like?**
-Wait for the safe window, Ctrl-C, find the commit in `git log --oneline`, and undo just it:
-`git revert <commit-id>`. Then note what you didn't like in `greenlight/DECISIONS.md` so
-the loop doesn't redo it, and restart the loop.
+You're watching it live, so you can just tell it — press Esc to interrupt and type what's
+wrong; it course-corrects in place. For something already committed: exit the loop, find the
+commit in `git log --oneline`, undo just it with `git revert <commit-id>`, note what you
+didn't like in `greenlight/DECISIONS.md` so the loop doesn't redo it, and relaunch.
 
 **...the terminal says `claude: command not found`?**
 PATH problem — redo Part 0 step 2, or open a fresh terminal window.
 
-**...I'm not sure whether it's mid-flight?**
-The last line in the loop's terminal tells you. Backup check from any terminal:
-`pgrep -f 'claude -p' >/dev/null && echo MID-FLIGHT || echo safe`
-
-**...an iteration errors?**
-The loop shrugs and tries again next interval — one failed iteration never kills it. If it
-fails repeatedly, Ctrl-C and run one iteration by hand to see the actual error:
-`claude -p "$(cat greenlight/prompts/loop.md)" --dangerously-skip-permissions`
+**...the session crashed, hung, or hit its usage limit?**
+Nothing is lost — every finished iteration is already committed. Close it (Ctrl-C if it's
+hung), fix whatever it complained about (usage limits reset on their own), and relaunch with
+the same command; it re-reads the files and continues. If it hangs repeatedly at the same
+spot, look at `greenlight/CONTROL.md` §5 Next Action — that's the step it's stuck on — and
+tell it what to do about it in the session.
 
 ---
 

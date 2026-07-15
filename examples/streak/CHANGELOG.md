@@ -69,7 +69,7 @@
 - Did: verified UX-002 · Why: Verify rung · Touched: UX-002 → PASSING (1/3)
 
 ## v0.8.0 — loop 15 — 2026-02-19T09:26Z
-- Did: the Build rung reached F-005 (friend pairing) and could not proceed — the invite model and what a partner may see are product calls only the human can make. Marked it BLOCKED, wrote the ask to DECISIONS and to `greenlight/state/NEEDS_HUMAN`, then took the next actionable rung instead of guessing: hardened all seven greens (2/3)
+- Did: the Build rung reached F-005 (friend pairing) and could not proceed — the invite model and what a partner may see are product calls only the human can make. Marked it BLOCKED, wrote the ask to DECISIONS and repeated it to the human, then took the next actionable rung instead of guessing: hardened all seven greens (2/3)
 - Why: Build rung → BLOCKED (a blocked ask never costs a loop), then Harden. No code merged, so no version bump
 - Touched: F-005 → BLOCKED; SEC-001, SEC-002, F-001, F-002, F-003, UX-001, UX-002 → 2/3
 
