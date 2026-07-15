@@ -95,8 +95,9 @@ git init
 # 2. Install Greenlight:
 curl -fsSL https://raw.githubusercontent.com/nikoslater/greenlight/main/install.sh | bash
 
-# 3. Commit once (this creates `main`)...
+# 3. Commit once, and make sure your base branch is named `main`:
 git add -A && git commit -m "Set up Greenlight"
+git branch -M main
 
 # 4. ...then branch — the loop does ALL its work here, never on main:
 git checkout -b greenlight-build

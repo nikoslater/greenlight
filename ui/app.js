@@ -40,11 +40,25 @@ function add(html, cls) {
 
 /* ------------------------------------------------------------ feed events */
 
+function settleNewestOpen(kind, label) {
+  const cards = [...feed.querySelectorAll(`.ask[data-kind="${kind}"]:not(.settled)`)];
+  const card = cards[cards.length - 1];
+  if (!card) return;
+  card.classList.add('settled');
+  const picked = card.querySelector('.picked');
+  if (picked) { picked.hidden = false; picked.textContent = label; }
+}
+
 function renderEvent(evt) {
   const { type, data } = evt;
 
   if (type === 'claude') add(md(data.text), 'entry claude');
   if (type === 'you') add(md(data.text), 'entry you');
+  if (type === 'question-answered') {
+    const first = Object.values(data.answers || {})[0];
+    settleNewestOpen('question', first ? `you chose: ${first}` : 'answered');
+  }
+  if (type === 'approval-answered') settleNewestOpen('approval', data.allow ? 'allowed' : 'denied');
   if (type === 'tool') {
     const label = data.label ? ` <b>${esc(data.label)}</b>` : '';
     add(`<span class="chip">▸ ${esc(data.name)}${label}</span>`, '');
@@ -60,39 +74,83 @@ function renderEvent(evt) {
 }
 
 function renderQuestion(data) {
-  const q = (data.questions && data.questions[0]) || { question: '(question)', options: [] };
+  // AskUserQuestion can carry 1-4 questions, each single- or multi-select.
+  const questions = (data.questions || []).length ? data.questions : [{ question: '(question)', options: [] }];
   const card = add('', 'ask');
-  card.innerHTML = `
-    <h3>${esc(q.question)}</h3>
-    ${q.header ? `<div class="why">${esc(q.header)}</div>` : ''}
-    <div class="opts"></div>
-    <div class="picked" hidden></div>`;
-  const opts = card.querySelector('.opts');
-  const settle = (label) => {
+  card.dataset.kind = 'question';
+  const answers = {};
+  const doneCount = () => Object.keys(answers).length;
+
+  const finish = () => {
     card.classList.add('settled');
     const picked = card.querySelector('.picked');
     picked.hidden = false;
-    picked.textContent = `you chose: ${label}`;
-    post('/answer', { id: data.id, answers: { [q.question]: label } });
+    picked.textContent = `you chose: ${Object.values(answers).join(' · ')}`;
+    post('/answer', { id: data.id, answers });
   };
-  (q.options || []).forEach((o) => {
-    const b = document.createElement('button');
-    b.innerHTML = `${esc(o.label)}${o.description ? `<small>${esc(o.description)}</small>` : ''}`;
-    b.onclick = () => settle(o.label);
-    opts.appendChild(b);
+
+  questions.forEach((q) => {
+    const box = document.createElement('div');
+    box.innerHTML = `
+      <h3>${esc(q.question)}</h3>
+      ${q.header ? `<div class="why">${esc(q.header)}</div>` : ''}
+      <div class="opts"></div>`;
+    const opts = box.querySelector('.opts');
+    const selected = new Set();
+
+    const pick = (label) => {
+      if (q.multiSelect) {
+        selected.has(label) ? selected.delete(label) : selected.add(label);
+        [...opts.children].forEach((b) => b.classList.toggle('on', selected.has(b.dataset.label)));
+        answers[q.question] = [...selected].join(', ');
+        if (!selected.size) delete answers[q.question];
+        return;
+      }
+      answers[q.question] = label;
+      [...opts.children].forEach((b) => b.classList.toggle('on', b.dataset.label === label));
+      if (doneCount() === questions.length) finish();
+    };
+
+    (q.options || []).forEach((o) => {
+      const b = document.createElement('button');
+      b.dataset.label = o.label;
+      b.innerHTML = `${esc(o.label)}${o.description ? `<small>${esc(o.description)}</small>` : ''}`;
+      b.onclick = () => pick(o.label);
+      opts.appendChild(b);
+    });
+    const other = document.createElement('button');
+    other.dataset.label = '__other__';
+    other.innerHTML = 'Other…<small>type your own answer</small>';
+    other.onclick = () => {
+      const text = prompt(q.question);
+      if (!text) return;
+      answers[q.question] = text;
+      other.classList.add('on');
+      if (!q.multiSelect && doneCount() === questions.length) finish();
+    };
+    opts.appendChild(other);
+    card.appendChild(box);
   });
-  const other = document.createElement('button');
-  other.innerHTML = 'Other…<small>type your own answer below</small>';
-  other.onclick = () => {
-    const text = prompt(q.question);
-    if (text) settle(text);
-  };
-  opts.appendChild(other);
+
+  // Multi-select (or multi-question with a multiSelect present) needs an explicit submit.
+  if (questions.some((q) => q.multiSelect)) {
+    const done = document.createElement('button');
+    done.className = 'submit';
+    done.textContent = 'Send answers';
+    done.onclick = () => { if (doneCount() === questions.length) finish(); };
+    card.appendChild(done);
+  }
+
+  const picked = document.createElement('div');
+  picked.className = 'picked';
+  picked.hidden = true;
+  card.appendChild(picked);
   scrollFeed();
 }
 
 function renderApproval(data) {
   const card = add('', 'ask');
+  card.dataset.kind = 'approval';
   card.innerHTML = `
     <h3>Allow this?</h3>
     <div class="why mono">${esc(data.summary || data.tool)}</div>

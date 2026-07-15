@@ -77,16 +77,16 @@ function parseSecurity(md) {
 }
 
 function parseOpenAsks(decisions, board) {
+  // A feature is "waiting on you" while its board row says BLOCKED; the matching
+  // DECISIONS blocker entry provides the human-readable ask.
   const asks = [];
-  const blockedIds = new Set(board.filter((r) => r.status === 'BLOCKED').map((r) => r.id));
   if (!decisions) return asks;
+  const blockedIds = board.filter((r) => r.status === 'BLOCKED').map((r) => r.id);
+  if (!blockedIds.length) return asks;
   for (const block of decisions.split(/^## /m).slice(1)) {
     const title = block.split('\n')[0].trim();
     const isBlocker = /Type:\s*blocker/i.test(block);
-    const answered = /Answer:|Status:\s*(answered|resolved)/i.test(block);
-    if (isBlocker && !answered && [...blockedIds].some((id) => block.includes(id) || true)) {
-      asks.push(title);
-    }
+    if (isBlocker && blockedIds.some((id) => block.includes(id))) asks.push(title);
   }
   return asks.slice(-4);
 }
@@ -145,6 +145,7 @@ try { fs.watch(path.join(REPO, '.git'), (_, f) => { if (!f || /HEAD|refs/.test(f
 
 const session = {
   active: false,
+  starting: false,          // synchronous guard against a double Start click
   mode: null,               // 'bootstrap' | 'loop' | 'chat'
   review: false,            // true => Edit/Write/Bash wait for an Allow button
   inbox: [],
@@ -155,6 +156,8 @@ const session = {
 
 const MUTATING = new Set(['Edit', 'Write', 'MultiEdit', 'NotebookEdit', 'Bash']);
 
+let sessionEpoch = 0;
+
 function pushUser(text) {
   session.inbox.push({
     type: 'user',
@@ -164,9 +167,11 @@ function pushUser(text) {
   session.wake?.();
 }
 
-async function* userStream() {
-  while (session.active) {
-    while (session.inbox.length) yield session.inbox.shift();
+async function* userStream(epoch) {
+  // The epoch guard keeps a stale generator from a stopped session from ever
+  // stealing messages meant for the next one.
+  while (session.active && epoch === sessionEpoch) {
+    while (session.inbox.length && epoch === sessionEpoch) yield session.inbox.shift();
     await new Promise((r) => (session.wake = r));
   }
 }
@@ -177,42 +182,62 @@ function waitForBrowser(kind, payload) {
   return new Promise((resolve) => session.pending.set(id, resolve));
 }
 
+// AskUserQuestion always routes here — surface it as a question card.
 async function canUseTool(toolName, input) {
   if (toolName === 'AskUserQuestion') {
     const reply = await waitForBrowser('question', { questions: input.questions || [] });
     broadcast('question-answered', { answers: reply.answers });
     return { behavior: 'allow', updatedInput: { ...input, answers: reply.answers } };
   }
-  if (session.review && MUTATING.has(toolName)) {
-    const summary =
-      toolName === 'Bash' ? input.command :
-      input.file_path ? `${toolName} ${path.relative(REPO, String(input.file_path))}` : toolName;
-    const reply = await waitForBrowser('approval', { tool: toolName, summary });
-    if (!reply.allow) {
-      broadcast('denied', { tool: toolName, summary });
-      return { behavior: 'deny', message: 'The human denied this from the dashboard. Ask them what to do instead.' };
-    }
-  }
   return { behavior: 'allow', updatedInput: input };
 }
 
+// Review-mode gating lives in a PreToolUse hook, NOT canUseTool: hooks run before
+// settings allow-rules, so a change waits for the Allow button even when the user's
+// Claude settings would otherwise auto-approve the tool. (The SDK itself recommends
+// exactly this to "gate every tool call".)
+async function preToolUse(inp) {
+  if (!session.review || !MUTATING.has(inp.tool_name)) return {};
+  const ti = inp.tool_input || {};
+  const summary =
+    inp.tool_name === 'Bash' ? ti.command :
+    ti.file_path ? `${inp.tool_name} ${path.relative(REPO, String(ti.file_path))}` : inp.tool_name;
+  const reply = await waitForBrowser('approval', { tool: inp.tool_name, summary });
+  broadcast('approval-answered', { allow: !!reply.allow });
+  if (!reply.allow) {
+    broadcast('denied', { tool: inp.tool_name, summary });
+    return { hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: 'The human denied this from the dashboard. Ask them what to do instead.' } };
+  }
+  return { hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'allow', permissionDecisionReason: 'Approved in the Greenlight dashboard.' } };
+}
+
 async function runSession(mode, firstMessage) {
-  const { query } = await import('@anthropic-ai/claude-agent-sdk');
+  let query;
+  try {
+    ({ query } = await import('@anthropic-ai/claude-agent-sdk'));
+  } catch {
+    session.starting = false;
+    broadcast('error', { message: 'Dashboard dependencies missing — rerun ./greenlight/ui/start.sh to install them.' });
+    return;
+  }
   session.active = true;
+  session.starting = false;
   session.mode = mode;
   session.abort = new AbortController();
+  const epoch = ++sessionEpoch;
   broadcast('session', { status: 'running', mode });
   pushUser(firstMessage);
 
   try {
     const q = query({
-      prompt: userStream(),
+      prompt: userStream(epoch),
       options: {
         cwd: REPO,
         abortController: session.abort,
         permissionMode: 'default',
         settingSources: ['user', 'project', 'local'],
         canUseTool,
+        hooks: { PreToolUse: [{ hooks: [preToolUse] }] },
         ...(process.env.ANTHROPIC_MODEL ? { model: process.env.ANTHROPIC_MODEL } : {}),
       },
     });
@@ -238,6 +263,8 @@ async function runSession(mode, firstMessage) {
   } finally {
     session.active = false;
     session.mode = null;
+    session.inbox.length = 0;
+    session.wake?.();          // wake the generator so it observes the end and returns
     for (const resolve of session.pending.values()) resolve({ allow: false, answers: {} });
     session.pending.clear();
     broadcast('session', { status: 'idle' });
@@ -251,11 +278,12 @@ const DASHBOARD_PREAMBLE =
   'AskUserQuestion tool — they answer with buttons. Keep narration short and plain.\n\n';
 
 async function startMode(mode, text) {
-  if (session.active) return { error: 'A session is already running. Stop it first.' };
+  if (session.active || session.starting) return { error: 'A session is already running. Stop it first.' };
+  session.starting = true;     // synchronous guard: blocks a second click during the awaits below
   if (mode === 'chat') { runSession('chat', DASHBOARD_PREAMBLE + text); return {}; }
   const file = mode === 'bootstrap' ? 'prompts/bootstrap.md' : 'prompts/loop.md';
   const prompt = await readIf(path.join(GL_DIR, file));
-  if (!prompt) return { error: `${file} not found — is Greenlight installed in this project?` };
+  if (!prompt) { session.starting = false; return { error: `${file} not found — is Greenlight installed in this project?` }; }
   runSession(mode, DASHBOARD_PREAMBLE + prompt);
   return {};
 }
@@ -304,9 +332,27 @@ async function runMock() {
 const MIME = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.svg': 'image/svg+xml' };
 
 async function body(req) {
-  let raw = '';
-  for await (const chunk of req) raw += chunk;
-  try { return JSON.parse(raw || '{}'); } catch { return {}; }
+  try {
+    let raw = '';
+    for await (const chunk of req) raw += chunk;
+    return JSON.parse(raw || '{}');
+  } catch {
+    return {};                 // aborted socket or bad JSON — never crash the server
+  }
+}
+
+// A local dashboard must refuse commands from other websites open in the browser.
+// Same-origin fetches from the served page carry a localhost Origin; block the rest,
+// and reject non-local Host headers (DNS-rebinding guard).
+function isLocalRequest(req) {
+  const host = (req.headers.host || '').split(':')[0];
+  if (host && host !== 'localhost' && host !== '127.0.0.1') return false;
+  const origin = req.headers.origin;
+  if (!origin) return true;    // curl / native clients send no Origin
+  try {
+    const h = new URL(origin).hostname;
+    return h === 'localhost' || h === '127.0.0.1';
+  } catch { return false; }
 }
 
 const server = http.createServer(async (req, res) => {
@@ -323,15 +369,25 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === 'POST') {
+    if (!isLocalRequest(req)) return send(403, { error: 'cross-origin request refused' });
     const b = await body(req);
     if (url.pathname === '/start') {
       if (MOCK) { runMock(); return send(200, {}); }
-      return send(200, await startMode(b.mode, b.text || ''));
+      const r = await startMode(b.mode, b.text || '');
+      if (r.error) broadcast('error', { message: r.error });
+      return send(200, r);
     }
     if (url.pathname === '/send') {
-      if (!session.active) return send(200, await startMode('chat', b.text));
-      pushUser(b.text);
-      broadcast('you', { text: b.text });
+      const text = (b.text || '').trim();
+      if (!text) return send(200, {});
+      if (!session.active) {
+        broadcast('you', { text });
+        const r = await startMode('chat', text);
+        if (r.error) broadcast('error', { message: r.error });
+        return send(200, r);
+      }
+      pushUser(text);
+      broadcast('you', { text });
       return send(200, {});
     }
     if (url.pathname === '/answer') {

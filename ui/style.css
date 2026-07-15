@@ -152,7 +152,18 @@ main {
   text-align: left;
 }
 .ask .opts button:hover { background: var(--ink); color: var(--paper); }
+.ask .opts button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .ask .opts button small { display: block; color: inherit; opacity: 0.65; font-size: 12px; }
+.ask h3 + .why, .ask div + div h3 { margin-top: 10px; }
+.ask .submit {
+  margin-top: 12px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--paper);
+  border-radius: 6px;
+  padding: 6px 16px;
+}
+.ask.settled .submit { display: none; }
 .ask.settled { border-left-color: var(--good); opacity: 0.65; }
 .ask.settled .opts { display: none; }
 .ask .picked { color: var(--good); font-size: 13px; }
