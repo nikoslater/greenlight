@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Greenlight</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='38' fill='%236F7D5C'/></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="lamp" id="lamp" title="greenlight status"></span>
+    <h1 id="project">Greenlight</h1>
+    <span class="meta" id="meta"></span>
+  </div>
+  <div class="controls">
+    <label class="review" title="When on, every file edit and command waits for your Allow button">
+      <input type="checkbox" id="review"> review each change
+    </label>
+    <button id="btn-bootstrap" class="ghost">Bootstrap</button>
+    <button id="btn-loop" class="primary">Start loop</button>
+    <button id="btn-stop" class="danger" hidden>Stop</button>
+  </div>
+</header>
+
+<main>
+  <section id="feed-pane">
+    <div id="feed" aria-live="polite"></div>
+    <form id="composer">
+      <input id="say" type="text" placeholder="Say something to Claude — answer a question, give direction…" autocomplete="off">
+      <button type="submit" class="primary">Send</button>
+    </form>
+  </section>
+
+  <aside id="board-pane">
+    <div id="notready" class="card" hidden>
+      <h2>Not bootstrapped yet</h2>
+      <p>This project doesn't have its Greenlight brain (<code>greenlight/CONTROL.md</code>) yet.
+      Click <strong>Bootstrap</strong> and answer the questions — that's the one-time setup
+      conversation where you describe your idea.</p>
+    </div>
+
+    <div id="ready">
+      <div class="card" id="next-card">
+        <h2>Next action</h2>
+        <p id="next">—</p>
+      </div>
+
+      <div class="card">
+        <h2>Features <span class="count" id="feature-count"></span></h2>
+        <table id="board"><tbody></tbody></table>
+      </div>
+
+      <div class="card" id="asks-card" hidden>
+        <h2>Waiting on you</h2>
+        <ul id="asks"></ul>
+      </div>
+
+      <div class="card">
+        <h2>Security baseline</h2>
+        <div class="sec"><div id="sec-bar"></div></div>
+        <p class="sub" id="sec-label"></p>
+      </div>
+
+      <div class="card">
+        <h2>Recent commits <span class="count" id="branch"></span></h2>
+        <ul id="commits" class="mono"></ul>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

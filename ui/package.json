@@ -1,0 +1,16 @@
+{
+  "name": "greenlight-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local dashboard for Greenlight: watch the loop work, answer its questions, approve changes.",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.0"
+  }
+}

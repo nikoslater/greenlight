@@ -7,6 +7,11 @@ you the important questions in plain English, sets the project up the way a seni
 engineering team would, and then a loop builds, tests, and fixes it step by step — until
 everything is proven stable and it tells you: **GREENLIGHT ACHIEVED.**
 
+You watch it all happen in the **Greenlight dashboard** — a local one-window app where you
+see Claude work in real time, watch every feature's status change, answer its questions with
+buttons, and (if you want) approve every change before it happens. No terminal-watching, no
+refreshing GitHub to see what changed.
+
 ## Why this exists
 
 AI-built ("vibe-coded") apps tend to fail the same ways: security bolted on too late, a
@@ -50,8 +55,22 @@ claude
 ```
 
 The first bare `claude` run walks you through logging in with your Anthropic account in a
-browser. Once you're in, type `/exit`. Do this before ever starting a loop — the loop runs
-Claude non-interactively and cannot handle a login prompt.
+browser. Once you're in, type `/exit`. Do this before ever starting a loop — the dashboard
+drives Claude with your login, and can't handle the first-time login prompt itself.
+
+**4. Install Node.js** (powers the dashboard). Check with `node --version` — if that prints
+v18 or higher you're done. Otherwise grab the LTS installer from
+[nodejs.org](https://nodejs.org) and run it.
+
+**5. Recommended — install the ponytail plugin.** [Ponytail](https://github.com/DietrichGebert/ponytail)
+makes the agent code like the laziest senior dev in the room: the best code is the code never
+written. Greenlight's standards are built around its ladder, and the plugin enforces it every
+turn. Run `claude`, then type these two commands, then `/exit`:
+
+```
+/plugin marketplace add DietrichGebert/ponytail
+/plugin install ponytail@ponytail
+```
 
 **Terminal tips for the road:** don't paste lines containing `#` comments into zsh (it
 treats them as arguments, not comments — or run `setopt interactive_comments` once to allow
@@ -119,93 +138,82 @@ you want the branch on GitHub updated.
 
 ---
 
-## Part 2 — Bootstrap (one interactive conversation)
+## Part 2 — Open the dashboard and bootstrap
 
 ```bash
-claude "$(cat greenlight/prompts/bootstrap.md)"
+./greenlight/ui/start.sh
 ```
 
-This opens a live chat session, not the loop:
+Your browser opens one window (the first run installs the dashboard, about a minute). On the
+left: a live feed of everything Claude does and says, with a box to talk back. On the right:
+the project board — every feature and its status, the single next action, the security
+checklist, recent commits, and anything waiting on you.
 
-- **New idea?** Paste your braindump when asked. It will reflect the idea back, ask the
-  one-way-door questions (each with a suggested default, so "go with your suggestions"
-  always works), propose a lean v1 feature list, and **wait for your "go"** before
-  scaffolding anything.
+Click **Bootstrap** — the one-time setup conversation:
+
+- **New idea?** Type your braindump into the box when it asks. It reflects the idea back,
+  asks the one-way-door questions **as cards with buttons** (each option explained, and
+  "go with your suggestions" always works), proposes a lean v1 feature list, and waits for
+  your go before scaffolding anything.
 - **Existing codebase?** It studies your code and fills in the Greenlight docs from reality,
   fixing nothing yet.
 
-When it finishes its summary, type `/exit`. Your project now has its brain:
-`greenlight/CONTROL.md` (features, statuses, next action) and its rulebooks
-(`STANDARDS.md`, `STACKS.md`, `DESIGN.md`) alongside it.
+When it finishes, the right-hand board lights up with your feature list — that's your
+project's brain (`greenlight/CONTROL.md`), and from now on you watch it change in real time.
 
 ---
 
 ## Part 3 — Run the loop
 
-```bash
-claude "$(cat greenlight/prompts/loop.md)"
-```
+Click **Start loop**. That's it.
 
-That's the whole loop. Claude Code is itself an agentic loop, so Greenlight rides it
-natively: in one session it runs iteration after iteration — each one walks the priority
-ladder, does ONE work step (build a feature, run its tests, fix what broke, save evidence),
-commits it, narrates a one-line summary, and rolls straight into the next. You watch it work
-live in the terminal. It stops itself when the app is done (**GREENLIGHT ACHIEVED**), or
-pauses and asks you when it hits a decision only you can make.
+Each iteration walks the priority ladder, does ONE work step (build a feature, run its
+tests, fix what broke, save evidence), commits it, and rolls into the next — while the feed
+narrates and the board updates live. It stops itself when the app is done
+(**GREENLIGHT ACHIEVED** — the header lamp turns green), or asks you with buttons when it
+hits a decision only you can make.
 
-- To pin a specific model: `ANTHROPIC_MODEL=claude-opus-4-8 claude "$(cat greenlight/prompts/loop.md)"`
-  (or type `/model` inside the session).
-- To stop early: press **Esc** to interrupt what it's doing, or type `/exit` between
-  iterations. The files are the loop's memory, so stopping is always safe — rerun the same
-  command later and it picks up exactly where the ledgers say it left off.
-- Long runs are fine: Claude Code compacts its own context automatically, and because the
-  files are the memory, you can also just exit and relaunch anytime for a completely fresh
-  brain — it re-reads CONTROL.md and the ledgers and carries on.
+- **Want to approve every change?** Turn on **review each change** (top right). Every file
+  edit and command then waits for your Allow/Deny click. Leave it off to let the loop run
+  free — questions still come to you either way.
+- **Steer anytime**: type in the box — "focus on the dashboard feature next", "don't use
+  that library" — it course-corrects.
+- **Stop** button halts the session safely. The files are the loop's memory, so stopping is
+  always safe: Start loop later and it picks up exactly where the ledgers say it left off.
+- **Overnight (Mac):** system sleep pauses the loop, so start the dashboard with
+  `caffeinate -is ./greenlight/ui/start.sh` to keep the machine awake while it runs. Lid
+  open, plugged in.
 
-**Running it overnight (Mac):** the screen turning off is fine, but system sleep pauses the
-session and can kill an in-flight step. Prefix the command with macOS's built-in
-`caffeinate` to keep the machine awake exactly as long as the loop runs:
-
-```bash
-caffeinate -is claude "$(cat greenlight/prompts/loop.md)"
-```
-
-Keep the lid open (closing it forces sleep regardless) and stay plugged in (`-s` only
-prevents sleep on AC power). Nothing to undo afterward — sleep behavior returns to normal
-the moment the loop exits.
+**Prefer the terminal?** The dashboard is optional — the same two prompts run directly in
+Claude Code: `claude "$(cat greenlight/prompts/bootstrap.md)"` once, then
+`claude "$(cat greenlight/prompts/loop.md)"` for the loop. Pin a model with
+`ANTHROPIC_MODEL=claude-opus-4-8` before either command (the dashboard honors it too).
 
 ---
 
 ## While it runs — the two states that matter
 
-**WORKING** (the session is mid-step, tools firing, text streaming): the agent is editing
-your files. Don't edit files, don't switch branches, don't pull. Looking is always fine.
+**WORKING** (the header lamp pulses, tools firing in the feed): the agent is editing your
+files. Don't edit files, don't switch branches, don't pull. Watching is always fine.
 
-**WAITING** (it printed an iteration summary, or is asking you a question): do anything —
-answer it, push, clean up, or stop the loop.
+**WAITING** (a question card is open, or the feed says the session finished): do anything —
+answer, push, clean up, or start the next run.
 
-Watch progress from a second terminal tab:
-
-```bash
-git log --oneline -10
-```
-Every iteration that does work ends in a commit — this is the loop's diary. (The one
-exception: an iteration with nothing to do but wait for an answer from you makes no commit.)
-
-```bash
-cat greenlight/CONTROL.md
-```
-The live status board: every feature's state (PLANNED → UNVERIFIED → PASSING → STABLE)
-and the single next action.
+The board panel is the live truth: every feature's state (PLANNED → UNVERIFIED → PASSING →
+STABLE), the single next action, and the commit diary — every iteration that does work ends
+in a commit. (The one exception: an iteration with nothing to do but wait for an answer from
+you makes no commit.) The same truth is always in the files if you prefer a second terminal:
+`git log --oneline -10` and `cat greenlight/CONTROL.md`.
 
 ---
 
 ## Scenarios — "what do I do when..."
 
 **...I want to pause and resume later?**
-Type `/exit` once it's between iterations (or press Esc first to interrupt a step). Resume
-anytime with `claude "$(cat greenlight/prompts/loop.md)"` — the files are the loop's memory,
-so it picks up exactly where it left off, even days later.
+Click **Stop** in the dashboard (in the terminal: Esc, then `/exit`). Resume anytime by
+clicking **Start loop** again — the files are the loop's memory, so it picks up exactly
+where it left off, even days later. Closing the dashboard window or Ctrl-C'ing `start.sh`
+is also safe: every finished iteration is already committed.
 
 **...I want my progress backed up on GitHub?**
 The loop only commits locally — nothing leaves your computer on its own. If you started
@@ -227,10 +235,11 @@ branch, the push updates that PR automatically — no need to reopen it.
 
 **...the loop says it needs ME?**
 When it hits a decision only a human can make (a secret key, a product call, a destructive
-migration) it marks the item BLOCKED, writes the exact question to `greenlight/DECISIONS.md`,
-and tells you in the terminal — then keeps working on other things. Append your answer under
-the question in `greenlight/DECISIONS.md`, and the next iteration unblocks. (If the ask is
-the ONLY thing left, the loop stops and waits — answer, then relaunch it.)
+migration) it marks the item BLOCKED, records the exact question in `greenlight/DECISIONS.md`,
+and asks you — as a question card in the dashboard, or by typing your answer in the box —
+then keeps working on other things. Blocked items also sit in the board's "Waiting on you"
+card until resolved. (If the ask is the ONLY thing left, the loop stops and waits — answer,
+then click Start loop.)
 
 **...it says GREENLIGHT ACHIEVED?**
 The loop has stopped itself: every feature stable, security checklist green, UI verified by
@@ -255,31 +264,37 @@ git push origin --delete greenlight-build   # and on GitHub
 ```
 
 **...an iteration did something I don't like?**
-You're watching it live, so you can just tell it — press Esc to interrupt and type what's
-wrong; it course-corrects in place. For something already committed: exit the loop, find the
-commit in `git log --oneline`, undo just it with `git revert <commit-id>`, note what you
-didn't like in `greenlight/DECISIONS.md` so the loop doesn't redo it, and relaunch.
+You're watching it live, so just tell it — type what's wrong in the dashboard box; it
+course-corrects in place. For something already committed: Stop, find the commit in the
+board's commit list, undo just it with `git revert <commit-id>`, note what you didn't like
+in `greenlight/DECISIONS.md` so the loop doesn't redo it, and Start loop again. If you want
+veto power *before* changes land, that's the **review each change** toggle.
 
 **...the terminal says `claude: command not found`?**
 PATH problem — redo Part 0 step 2, or open a fresh terminal window.
 
 **...the session crashed, hung, or hit its usage limit?**
-Nothing is lost — every finished iteration is already committed. Close it (Ctrl-C if it's
-hung), fix whatever it complained about (usage limits reset on their own), and relaunch with
-the same command; it re-reads the files and continues. If it hangs repeatedly at the same
-spot, look at `greenlight/CONTROL.md` §5 Next Action — that's the step it's stuck on — and
-tell it what to do about it in the session.
+Nothing is lost — every finished iteration is already committed. Stop it (Ctrl-C the
+dashboard's terminal if it's fully hung), fix whatever it complained about (usage limits
+reset on their own), and Start loop again; it re-reads the files and continues. If it hangs
+repeatedly at the same spot, look at the board's Next action — that's the step it's stuck
+on — and tell it what to do about it in the box.
 
 ---
 
 ## What's under the hood
 
+- **The dashboard** (`greenlight/ui/`) — a small local app (one dependency) that drives
+  Claude Code through the official Agent SDK using your existing login. It streams the
+  session live, turns Claude's questions into buttons, gates changes behind Allow/Deny when
+  review mode is on, and renders the board straight from the files below — it displays
+  state, it never owns it. Everything works identically from a plain terminal.
 - **CONTROL.md** — the brain: what the app is, every feature's live status, a strict
   priority ladder (security first, regressions second), and the single next step.
-- **STANDARDS.md** — how the code must be written: security rules, a "write the least
-  code that works" ladder (inspired by the ponytail skill), logging that never leaks
-  personal data, and UI rules that kill the generic-AI look (design brief, real empty/
-  loading/error states, no dead buttons).
+- **STANDARDS.md** — how the code must be written: security rules, the
+  [ponytail](https://github.com/DietrichGebert/ponytail) "write the least code that works"
+  ladder, logging that never leaks personal data, and UI rules that kill the generic-AI look
+  (design brief, real empty/loading/error states, no dead buttons).
 - **DESIGN.md** — a one-page design brief created at setup so the app has an intentional
   look instead of the statistical average.
 - **STACKS.md** — preset, research-backed technology choices per app type, so the setup

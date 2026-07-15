@@ -12,11 +12,17 @@ done
 for f in bootstrap.md loop.md; do
   curl -fsSL "$REPO_RAW/prompts/$f" -o "greenlight/prompts/$f"
 done
+mkdir -p greenlight/ui
+for f in server.mjs index.html style.css app.js package.json start.sh; do
+  curl -fsSL "$REPO_RAW/ui/$f" -o "greenlight/ui/$f"
+done
+chmod +x greenlight/ui/start.sh
 # if .gitignore's last line has no trailing newline, our append would fuse onto it
 if [ -s .gitignore ] && [ -n "$(tail -c 1 .gitignore)" ]; then printf '\n' >> .gitignore; fi
 grep -qxF '.env' .gitignore 2>/dev/null || printf '.env\n' >> .gitignore
 grep -qxF 'greenlight/state/' .gitignore 2>/dev/null || printf 'greenlight/state/\n' >> .gitignore
+grep -qxF 'greenlight/ui/node_modules/' .gitignore 2>/dev/null || printf 'greenlight/ui/node_modules/\n' >> .gitignore
 [ -f .env.example ] || printf '# Copy to .env and fill. Never commit real secrets.\n' > .env.example
 echo "Greenlight installed (everything under greenlight/)."
-echo "1) Run your agent with greenlight/prompts/bootstrap.md (paste your idea dump if the repo is new)"
-echo '2) Then run the loop: claude "$(cat greenlight/prompts/loop.md)"'
+echo "Open the dashboard:  ./greenlight/ui/start.sh"
+echo "(or run it in the terminal instead: claude \"\$(cat greenlight/prompts/bootstrap.md)\" once, then claude \"\$(cat greenlight/prompts/loop.md)\")"
