@@ -16,6 +16,9 @@
     <span class="meta" id="meta"></span>
   </div>
   <div class="controls">
+    <label class="review" title="Auto mode: the loop makes its own calls instead of asking you, and logs each one in the Decisions tab">
+      <input type="checkbox" id="auto"> auto-decide
+    </label>
     <label class="review" title="When on, every file edit and command waits for your Allow button">
       <input type="checkbox" id="review"> review each change
     </label>
@@ -27,7 +30,17 @@
 
 <main>
   <section id="feed-pane">
+    <div class="tabs">
+      <button class="tab on" data-tab="feed">Live</button>
+      <button class="tab" data-tab="decisions">Decisions <span class="tabcount" id="dec-count"></span></button>
+    </div>
     <div id="feed" aria-live="polite"></div>
+    <div id="decisions" hidden>
+      <p class="dec-empty" id="dec-empty">No auto-decisions yet. Turn on <strong>auto-decide</strong> and start the
+      loop — every call it makes on your behalf shows up here with its reasoning, and is saved to
+      <code>greenlight/DECISIONS.md</code> so it's in your project history too.</p>
+      <div id="dec-list"></div>
+    </div>
     <form id="composer">
       <input id="say" type="text" placeholder="Say something to Claude — answer a question, give direction…" autocomplete="off">
       <button type="submit" class="primary">Send</button>

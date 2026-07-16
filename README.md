@@ -177,6 +177,13 @@ hits a decision only you can make.
 - **Want to approve every change?** Turn on **review each change** (top right). Every file
   edit and command then waits for your Allow/Deny click. Leave it off to let the loop run
   free — questions still come to you either way.
+- **Want to walk away entirely?** Turn on **auto-decide**. Instead of stopping to ask you,
+  the loop makes each call itself — using its judgment plus Greenlight's standards, favoring
+  reversible choices — and logs every executive decision, with its reasoning, in the
+  **Decisions** tab (and in `greenlight/DECISIONS.md`, so it's committed to your project).
+  Come back later, open that tab, and read exactly what it chose and why. (auto-decide and
+  review are independent: you can let it decide questions on its own but still approve
+  changes, or any combination.)
 - **Steer anytime**: type in the box — "focus on the dashboard feature next", "don't use
   that library" — it course-corrects.
 - **Stop** button halts the session safely. The files are the loop's memory, so stopping is
@@ -242,6 +249,12 @@ then keeps working on other things. Blocked items also sit in the board's "Waiti
 card until resolved. (If the ask is the ONLY thing left, the loop stops and waits — answer,
 then click Start loop.)
 
+**...I ran it in auto-decide mode — what did it decide while I was away?**
+Open the **Decisions** tab. Every call the loop made on your behalf is there: the question,
+what it chose, and why (it favors reversible choices, so most are easy to change your mind
+on). The same record is saved in `greenlight/DECISIONS.md` and committed with your project,
+so it's permanent — if you disagree with one, tell the loop in the box and it'll revisit it.
+
 **...it says GREENLIGHT ACHIEVED?**
 The loop has stopped itself: every feature stable, security checklist green, UI verified by
 real clicks. Try the app yourself, then fold the work into main:
@@ -288,8 +301,10 @@ on — and tell it what to do about it in the box.
 - **The dashboard** (`greenlight/ui/`) — a small local app (one dependency) that drives
   Claude Code through the official Agent SDK using your existing login. It streams the
   session live, turns Claude's questions into buttons, gates changes behind Allow/Deny when
-  review mode is on, and renders the board straight from the files below — it displays
-  state, it never owns it. Everything works identically from a plain terminal.
+  review mode is on, and — in **auto-decide** mode — lets the loop answer its own questions
+  and compiles every executive decision (with rationale) into a Decisions tab. It renders
+  the board straight from the files below; it displays state, it never owns it. Everything
+  works identically from a plain terminal.
 - **CONTROL.md** — the brain: what the app is, every feature's live status, a strict
   priority ladder (security first, regressions second), and the single next step.
 - **STANDARDS.md** — how the code must be written: security rules, the

@@ -49,11 +49,43 @@ function settleNewestOpen(kind, label) {
   if (picked) { picked.hidden = false; picked.textContent = label; }
 }
 
+// Executive decisions: live auto-picks (this session) merge with the durable ones
+// parsed from DECISIONS.md, deduped by title, newest first.
+const liveDecisions = [];
+let stateDecisions = [];
+
+function renderDecisions() {
+  const seen = new Set();
+  const merged = [];
+  for (const d of [...liveDecisions].reverse().concat(stateDecisions.slice().reverse())) {
+    const key = (d.title || '').toLowerCase().slice(0, 80);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(d);
+  }
+  $('dec-count').textContent = merged.length ? merged.length : '';
+  $('dec-empty').hidden = merged.length > 0;
+  $('dec-list').innerHTML = merged
+    .map(
+      (d) => `<div class="dec">
+        <div class="dec-q">${esc(d.title)}</div>
+        ${d.chose ? `<div class="dec-chose">→ ${esc(d.chose)}</div>` : ''}
+        ${d.why ? `<div class="dec-why">${esc(d.why)}</div>` : ''}
+      </div>`
+    )
+    .join('');
+}
+
 function renderEvent(evt) {
   const { type, data } = evt;
 
   if (type === 'claude') add(md(data.text), 'entry claude');
   if (type === 'you') add(md(data.text), 'entry you');
+  if (type === 'decision') {
+    liveDecisions.push(data);
+    renderDecisions();
+    add(`<span class="chip">✓ auto-decided <b>${esc(data.title)}</b> → ${esc(data.chose)}</span>`, '');
+  }
   if (type === 'question-answered') {
     const first = Object.values(data.answers || {})[0];
     settleNewestOpen('question', first ? `you chose: ${first}` : 'answered');
@@ -213,6 +245,9 @@ function renderState(s) {
 
   $('branch').textContent = s.branch ? `on ${s.branch}` : '';
   $('commits').innerHTML = (s.commits || []).map((c) => `<li>${esc(c)}</li>`).join('');
+
+  stateDecisions = s.autoDecisions || [];
+  renderDecisions();
 }
 
 /* -------------------------------------------------------------- controls */
@@ -228,6 +263,21 @@ $('btn-loop').onclick = () => { post('/start', { mode: 'loop' }); add('starting 
 $('btn-bootstrap').onclick = () => { post('/start', { mode: 'bootstrap' }); add('starting bootstrap — it will ask about your idea…', 'sysline'); };
 $('btn-stop').onclick = () => post('/stop');
 $('review').onchange = (e) => post('/review', { on: e.target.checked });
+$('auto').onchange = (e) => {
+  post('/auto', { on: e.target.checked });
+  add(e.target.checked
+    ? 'auto-decide ON — the loop will make its own calls and log them in the Decisions tab.'
+    : 'auto-decide OFF — the loop will ask you again.', 'sysline');
+};
+
+document.querySelectorAll('.tab').forEach((t) => {
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('on', x === t));
+    const tab = t.dataset.tab;
+    $('feed').hidden = tab !== 'feed';
+    $('decisions').hidden = tab !== 'decisions';
+  };
+});
 
 $('composer').onsubmit = (e) => {
   e.preventDefault();
@@ -244,15 +294,18 @@ es.onmessage = (e) => {
   const evt = JSON.parse(e.data);
   if (evt.type === 'hello') {
     feed.innerHTML = '';
+    liveDecisions.length = 0;
     (evt.data.history || []).forEach(renderEvent);
     setRunning(!!evt.data.session?.active);
     $('review').checked = !!evt.data.session?.review;
+    $('auto').checked = !!evt.data.session?.auto;
     return;
   }
   if (evt.type === 'state') return renderState(evt.data);
   if (evt.type === 'session') {
     setRunning(evt.data.status === 'running');
     if (typeof evt.data.review === 'boolean') $('review').checked = evt.data.review;
+    if (typeof evt.data.auto === 'boolean') $('auto').checked = evt.data.auto;
     return;
   }
   renderEvent(evt);

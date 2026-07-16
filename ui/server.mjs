@@ -91,6 +91,21 @@ function parseOpenAsks(decisions, board) {
   return asks.slice(-4);
 }
 
+// Executive decisions the loop made on its own: auto-mode picks (Auto: yes) plus the
+// assumptions bootstrap records ("assumed — cheap to change until v1.0").
+function parseAutoDecisions(decisions) {
+  if (!decisions) return [];
+  const out = [];
+  for (const block of decisions.split(/^## /m).slice(1)) {
+    if (!/Auto:\s*yes/i.test(block) && !/assumed/i.test(block)) continue;
+    const title = block.split('\n')[0].trim().replace(/^[\d\-T:.Z ]+—\s*/, '').replace(/^Auto decision:\s*/i, '');
+    const chose = (block.match(/^Chose:\s*(.+)$/im) || [])[1] || '';
+    const why = (block.match(/^Why:\s*(.+)$/im) || block.match(/^Call:\s*(.+)$/im) || [])[1] || '';
+    out.push({ title, chose, why });
+  }
+  return out.slice(-40);
+}
+
 async function snapshotState() {
   const control = await readIf(path.join(GL_DIR, 'CONTROL.md'));
   const decisions = await readIf(path.join(GL_DIR, 'DECISIONS.md'));
@@ -110,6 +125,7 @@ async function snapshotState() {
     nextAction: parseNextAction(control),
     security: parseSecurity(control),
     openAsks: parseOpenAsks(decisions, board),
+    autoDecisions: parseAutoDecisions(decisions),
     branch: await exec('git', ['branch', '--show-current']),
     commits: ((await exec('git', ['log', '--oneline', '-12'])) || '').split('\n').filter(Boolean),
   };
@@ -148,6 +164,7 @@ const session = {
   starting: false,          // synchronous guard against a double Start click
   mode: null,               // 'bootstrap' | 'loop' | 'chat'
   review: false,            // true => Edit/Write/Bash wait for an Allow button
+  auto: false,              // true => the loop answers its own questions and logs each call
   inbox: [],
   wake: null,
   abort: null,
@@ -182,9 +199,51 @@ function waitForBrowser(kind, payload) {
   return new Promise((resolve) => session.pending.set(id, resolve));
 }
 
-// AskUserQuestion always routes here — surface it as a question card.
+// In auto mode the loop answers its own questions. We pick the option Greenlight's
+// convention marks as the recommended default (the "(Recommended)" label, else the
+// first option — bootstrap is told to lead with its suggestion), and record the call.
+function autoPick(q) {
+  const opts = q.options || [];
+  const rec = opts.find((o) => /recommended/i.test(o.label || '')) || opts[0];
+  return rec
+    ? { label: rec.label, why: rec.description || 'the recommended default' }
+    : { label: 'proceed', why: 'no options were offered' };
+}
+
+async function autoDecide(questions) {
+  const answers = {};
+  const decisions = [];
+  for (const q of questions || []) {
+    const pick = autoPick(q);
+    answers[q.question] = pick.label;
+    decisions.push({ title: q.question, chose: pick.label, why: pick.why, ts: Date.now() });
+  }
+  for (const d of decisions) broadcast('decision', d);   // live, kept in history
+  await appendDecisions(decisions);                       // durable, into DECISIONS.md
+  return answers;
+}
+
+// Append auto-decisions to the project's DECISIONS.md so they persist and get committed —
+// this is the human's opted-in record, and DECISIONS.md is Greenlight's decisions ledger.
+async function appendDecisions(decisions) {
+  if (!decisions.length) return;
+  const fp = path.join(GL_DIR, 'DECISIONS.md');
+  try { await fsp.access(fp); } catch { return; }   // pre-bootstrap: the agent records it when it creates the file
+  const now = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+  let block = '';
+  for (const d of decisions) {
+    block += `\n## ${now} — Auto decision: ${d.title}\nType: decision\nAuto: yes\nChose: ${d.chose}\nWhy: ${d.why}\n`;
+  }
+  try { await fsp.appendFile(fp, block); } catch { /* non-fatal */ }
+}
+
+// AskUserQuestion always routes here — auto-answer it in auto mode, else surface a card.
 async function canUseTool(toolName, input) {
   if (toolName === 'AskUserQuestion') {
+    if (session.auto) {
+      const answers = await autoDecide(input.questions || []);
+      return { behavior: 'allow', updatedInput: { ...input, answers } };
+    }
     const reply = await waitForBrowser('question', { questions: input.questions || [] });
     broadcast('question-answered', { answers: reply.answers });
     return { behavior: 'allow', updatedInput: { ...input, answers: reply.answers } };
@@ -272,19 +331,34 @@ async function runSession(mode, firstMessage) {
   }
 }
 
-const DASHBOARD_PREAMBLE =
-  'You are being driven from the Greenlight dashboard, a local UI. The human sees your ' +
-  'replies as a live feed. Whenever you need them to decide something, use the ' +
-  'AskUserQuestion tool — they answer with buttons. Keep narration short and plain.\n\n';
+function preamble() {
+  let p =
+    'You are being driven from the Greenlight dashboard, a local UI. The human sees your ' +
+    'replies as a live feed. Whenever you need them to decide something, use the ' +
+    'AskUserQuestion tool — they answer with buttons. Keep narration short and plain.\n\n';
+  if (session.auto) {
+    p +=
+      'AUTO MODE IS ON. The human has stepped away and authorized you to make the calls. ' +
+      'Do NOT wait on them. For every decision you would normally put to the human, choose ' +
+      'the best option yourself using your judgment plus Greenlight\'s STANDARDS and STACKS ' +
+      'defaults, and strongly prefer reversible, cheap-to-change choices. Record each such ' +
+      'executive decision in greenlight/DECISIONS.md as an entry with `Auto: yes`, a `Chose:` ' +
+      'line, and a `Why:` line naming the options you weighed and how reversible the pick is, ' +
+      'so the human can review your rationale later. If you still call AskUserQuestion, the ' +
+      'dashboard auto-answers with your recommended option and logs it — so always put your ' +
+      'genuine recommendation first.\n\n';
+  }
+  return p;
+}
 
 async function startMode(mode, text) {
   if (session.active || session.starting) return { error: 'A session is already running. Stop it first.' };
   session.starting = true;     // synchronous guard: blocks a second click during the awaits below
-  if (mode === 'chat') { runSession('chat', DASHBOARD_PREAMBLE + text); return {}; }
+  if (mode === 'chat') { runSession('chat', preamble() + text); return {}; }
   const file = mode === 'bootstrap' ? 'prompts/bootstrap.md' : 'prompts/loop.md';
   const prompt = await readIf(path.join(GL_DIR, file));
   if (!prompt) { session.starting = false; return { error: `${file} not found — is Greenlight installed in this project?` }; }
-  runSession(mode, DASHBOARD_PREAMBLE + prompt);
+  runSession(mode, preamble() + prompt);
   return {};
 }
 
@@ -304,22 +378,29 @@ async function runMock() {
   await sleep(900);
   broadcast('claude', { text: 'Verify rung: F-002 streak counter — all 14 unit tests pass, including the DST spring-forward edge. Promoting to PASSING (2/3) and saving evidence.' });
   await sleep(700);
-  const q = await waitForBrowser('question', {
-    questions: [{
-      question: 'F-005 needs an invite model. Which should I build?',
-      header: 'Invites',
-      options: [
-        { label: 'Share link', description: 'Anyone with the link can pair — simplest.' },
-        { label: 'Email invite', description: 'Send an invite to a specific address.' },
-      ],
-      multiSelect: false,
-    }],
-  });
-  broadcast('question-answered', { answers: q.answers });
+  const questions = [{
+    question: 'F-005 needs an invite model. Which should I build?',
+    header: 'Invites',
+    options: [
+      { label: 'Share link (Recommended)', description: 'Anyone with the link can pair — simplest, and reversible.' },
+      { label: 'Email invite', description: 'Send an invite to a specific address.' },
+    ],
+    multiSelect: false,
+  }];
+  if (session.auto) {
+    await autoDecide(questions);            // auto mode: decide and log, no waiting
+  } else {
+    const q = await waitForBrowser('question', { questions });
+    broadcast('question-answered', { answers: q.answers });
+  }
   await sleep(600);
-  session.review = true;
-  const a = await waitForBrowser('approval', { tool: 'Bash', summary: 'git commit -m "loop 7: verify F-002"' });
-  broadcast(a.allow ? 'tool' : 'denied', { name: 'Bash', tool: 'Bash', label: 'git commit -m "loop 7: verify F-002"', summary: 'git commit' });
+  const commit = 'git commit -m "loop 7: verify F-002"';
+  if (session.review) {
+    const a = await waitForBrowser('approval', { tool: 'Bash', summary: commit });
+    broadcast(a.allow ? 'tool' : 'denied', { name: 'Bash', tool: 'Bash', label: commit, summary: 'git commit' });
+  } else {
+    broadcast('tool', { name: 'Bash', label: commit });
+  }
   await sleep(500);
   broadcast('claude', { text: 'Committed. Next action: harden SEC-001 toward 3/3.' });
   broadcast('done', { subtype: 'success', cost: 0.42 });
@@ -362,7 +443,7 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/events') {
     res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
     clients.add(res);
-    res.write(`data: ${JSON.stringify({ type: 'hello', data: { history, session: { active: session.active, mode: session.mode, review: session.review } } })}\n\n`);
+    res.write(`data: ${JSON.stringify({ type: 'hello', data: { history, session: { active: session.active, mode: session.mode, review: session.review, auto: session.auto } } })}\n\n`);
     snapshotState().then((s) => res.write(`data: ${JSON.stringify({ type: 'state', data: s })}\n\n`));
     req.on('close', () => clients.delete(res));
     return;
@@ -401,7 +482,12 @@ const server = http.createServer(async (req, res) => {
     }
     if (url.pathname === '/review') {
       session.review = !!b.on;
-      broadcast('session', { status: session.active ? 'running' : 'idle', mode: session.mode, review: session.review });
+      broadcast('session', { status: session.active ? 'running' : 'idle', mode: session.mode, review: session.review, auto: session.auto });
+      return send(200, {});
+    }
+    if (url.pathname === '/auto') {
+      session.auto = !!b.on;
+      broadcast('session', { status: session.active ? 'running' : 'idle', mode: session.mode, review: session.review, auto: session.auto });
       return send(200, {});
     }
     return send(404, { error: 'unknown endpoint' });
