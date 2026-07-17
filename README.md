@@ -311,6 +311,21 @@ board's commit list, undo just it with `git revert <commit-id>`, note what you d
 in `greenlight/DECISIONS.md` so the loop doesn't redo it, and Start loop again. If you want
 veto power *before* changes land, that's the **review each change** toggle.
 
+**...a new Greenlight version is out — how do I update my project without losing anything?**
+Re-run the installer from your project folder (during a moment the loop isn't mid-step):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/nikoslater/greenlight/main/install.sh | bash
+```
+
+It replaces only the engine — `greenlight/prompts/`, `greenlight/templates/`, and the
+dashboard (`greenlight/ui/`) — and never touches your project's memory: `CONTROL.md`, the
+ledgers, evidence, your model choice, and your git history all stay exactly as they are.
+Because your live `CONTROL.md` was copied from an older template, finish with the one-time
+adoption step the installer prints: paste its "Adopt the latest rules…" message to Claude,
+which merges the new §0 rules into your live docs while keeping your Registry, board, and
+every ledger entry untouched. Then restart the dashboard and commit.
+
 **...the terminal says `claude: command not found`?**
 PATH problem — redo Part 0 step 2, or open a fresh terminal window.
 

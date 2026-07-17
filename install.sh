@@ -23,6 +23,18 @@ grep -qxF '.env' .gitignore 2>/dev/null || printf '.env\n' >> .gitignore
 grep -qxF 'greenlight/state/' .gitignore 2>/dev/null || printf 'greenlight/state/\n' >> .gitignore
 grep -qxF 'greenlight/ui/node_modules/' .gitignore 2>/dev/null || printf 'greenlight/ui/node_modules/\n' >> .gitignore
 [ -f .env.example ] || printf '# Copy to .env and fill. Never commit real secrets.\n' > .env.example
-echo "Greenlight installed (everything under greenlight/)."
-echo "Open the dashboard:  ./greenlight/ui/start.sh"
-echo "(or run it in the terminal instead: claude \"\$(cat greenlight/prompts/bootstrap.md)\" once, then claude \"\$(cat greenlight/prompts/loop.md)\")"
+if [ -f greenlight/CONTROL.md ]; then
+  echo "Greenlight UPDATED (prompts, templates, dashboard). Your CONTROL.md, ledgers,"
+  echo "evidence and git history were not touched — nothing is lost."
+  echo "One-time step to adopt the new rules into your live docs — paste this to Claude"
+  echo "(the dashboard box or the terminal):"
+  echo '  Adopt the latest rules from greenlight/templates/ into my live docs: update'
+  echo '  greenlight/CONTROL.md section 0 (ladder, statuses, waiting state, Maintenance)'
+  echo '  and section 4 checklist items, plus the DECISIONS.md header conventions, to match'
+  echo '  the templates — keeping my Profile, Charter, Registry, board statuses, checked'
+  echo '  boxes, and every ledger entry exactly as they are. Commit as bookkeeping.'
+else
+  echo "Greenlight installed (everything under greenlight/)."
+  echo "Open the dashboard:  ./greenlight/ui/start.sh"
+  echo "(or run it in the terminal instead: claude \"\$(cat greenlight/prompts/bootstrap.md)\" once, then claude \"\$(cat greenlight/prompts/loop.md)\")"
+fi
