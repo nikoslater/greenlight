@@ -338,20 +338,34 @@ function renderState(s) {
   renderIssues(s.knownIssues || { open: [], fixed: [] });
 }
 
+function issueLeaf(i, nested) {
+  const state = i.open ? '<span class="iss-open">open</span>' : `<span class="iss-fixed">${esc(i.status || 'fixed')}</span>`;
+  const tag = i.feature && !nested ? `<span class="mono">${esc(i.feature)}</span> · ` : '';
+  return `<div class="iss ${i.open ? 'open' : ''} ${nested ? 'child' : ''}">
+      <div class="iss-title">${esc(i.title)}</div>
+      <div class="iss-meta">${tag}${state}</div>
+    </div>`;
+}
+
+function issueNode(n) {
+  if (!n.children || !n.children.length) return issueLeaf(n, false);
+  // 2+ sub-issues → nested group under the feature/parent
+  return `<div class="iss-group ${n.open ? 'open' : ''}">
+      <div class="iss-group-head">${n.feature ? `<span class="mono">${esc(n.feature)}</span> ` : ''}${esc(n.title)}<span class="iss-sub">${n.children.length}</span></div>
+      ${n.children.map((c) => issueLeaf(c, true)).join('')}
+    </div>`;
+}
+
+function countOpen(nodes) {
+  return (nodes || []).reduce((s, n) => s + (n.children?.length ? n.children.filter((c) => c.open).length : (n.open ? 1 : 0)), 0);
+}
+
 function renderIssues(ki) {
   const open = ki.open || [];
   const fixed = ki.fixed || [];
-  $('iss-count').textContent = open.length || '';
+  $('iss-count').textContent = countOpen(open) || '';
   $('iss-empty').hidden = open.length + fixed.length > 0;
-  $('iss-list').innerHTML =
-    open.map((i) => `<div class="iss open">
-        <div class="iss-title">${esc(i.title)}</div>
-        <div class="iss-meta">${i.feature ? `<span class="mono">${esc(i.feature)}</span> · ` : ''}<span class="iss-open">open</span></div>
-      </div>`).join('') +
-    fixed.map((i) => `<div class="iss">
-        <div class="iss-title">${esc(i.title)}</div>
-        <div class="iss-meta">${i.feature ? `<span class="mono">${esc(i.feature)}</span> · ` : ''}<span class="iss-fixed">${esc(i.status)}</span></div>
-      </div>`).join('');
+  $('iss-list').innerHTML = open.map(issueNode).join('') + fixed.map(issueNode).join('');
 }
 
 /* -------------------------------------------------------------- controls */

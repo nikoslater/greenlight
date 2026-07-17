@@ -219,9 +219,11 @@ files. Don't edit files, don't switch branches, don't pull. Watching is always f
 answer, push, clean up, or start the next run.
 
 The board panel is the live truth: every feature's state (PLANNED → UNVERIFIED → PASSING →
-STABLE), the single next action, and the commit diary — every iteration that does work ends
-in a commit. The **Known issues** tab tracks every bug you've reported — open ones
-highlighted, fixed ones showing the version that fixed them. (The one exception: an iteration with nothing to do but wait for an answer from
+STABLE) — each one earns its status with its own commit, so the board moves feature by feature
+as the loop works, not in a sudden batch — the single next action, and the commit diary. The
+**Known issues** tab tracks every bug you've reported: open ones highlighted, fixed ones
+showing the version that fixed them, and related bugs nested under one heading (multiple issues
+on the same feature or button group show as sub-issues; a lone issue stays flat). (The one exception: an iteration with nothing to do but wait for an answer from
 you makes no commit.) The same truth is always in the files if you prefer a second terminal:
 `git log --oneline -10` and `cat greenlight/CONTROL.md`.
 

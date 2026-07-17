@@ -91,3 +91,21 @@ user's TZ. Lesson logged: this is exactly the regression that "never refactor an
 same change" prevents — the clean sequence was a separate refactor loop (extract the helper, re-prove
 F-002) *before* building F-004. Bundling them is what let a silent bug in; demoting a feature whose
 code changed is what caught it before DONE.
+
+## 2026-02-21T08:00Z loop=25 — Issue: dashboard heatmap tooltip shows the wrong date
+Type: issue
+Feature: F-003
+Context: reported by the human after GREENLIGHT — hovering a heatmap cell shows the previous day.
+Status: open
+
+## 2026-02-21T08:02Z loop=25 — Issue: heatmap cell click opens the wrong day's detail
+Type: issue
+Feature: F-003
+Context: same report — clicking a cell opens the day after; an off-by-one shared with the tooltip bug.
+Status: open
+
+## 2026-02-21T08:05Z loop=25 — Issue: check-in button double-fires on a slow connection
+Type: issue
+Feature: F-001
+Context: reported by the human — tapping check-in on a bad connection records two check-ins before the first response returns.
+Status: open

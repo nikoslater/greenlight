@@ -20,6 +20,8 @@ Status: (for ideas) pending review | approved | promoted to F-0XX | rejected
 
 Issue entries are the project's known-issues list: anything the human reports (before or
 after GREENLIGHT) gets one, titled `Issue: <summary>`, and stays `open` until its fix is proven.
+Related issues nest: give a sub-issue the same `Feature:` as its siblings, or a `Parent:` line
+naming a bigger issue — the dashboard groups them under one heading when there are two or more.
 
 ---
 

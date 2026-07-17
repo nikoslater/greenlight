@@ -142,6 +142,28 @@ main {
 .iss-open { color: var(--accent); font-weight: 600; }
 .iss-fixed { color: var(--good); }
 
+/* nested sub-issues */
+.iss-group {
+  border-left: 3px solid var(--clay);
+  padding: 4px 0 4px 14px;
+  margin-bottom: 16px;
+  max-width: 64ch;
+}
+.iss-group.open { border-left-color: var(--accent); }
+.iss-group-head { font-family: var(--serif); font-size: 15px; margin-bottom: 8px; }
+.iss-sub {
+  font-family: var(--mono); font-size: 11px; color: var(--ink-40);
+  border: 1px solid var(--ink-15); border-radius: 10px; padding: 0 7px; margin-left: 8px;
+}
+.iss.child {
+  border-left: none;
+  margin: 0 0 6px 4px;
+  padding: 3px 0 3px 12px;
+  border-left: 2px solid var(--ink-15);
+}
+.iss.child.open { border-left-color: var(--accent); }
+.iss.child .iss-title { font-family: var(--sans); font-size: 13.5px; }
+
 .entry { max-width: 62ch; margin-bottom: 14px; }
 
 .entry.claude p { margin-bottom: 6px; }

@@ -128,27 +128,51 @@ function parseAutoDecisions(decisions) {
   return out.slice(-40);
 }
 
-// Known issues: DECISIONS `Type: issue` entries (the durable record), plus any
-// BROKEN board row that doesn't have one yet.
+// Known issues: DECISIONS `Type: issue` entries (the durable record) plus any BROKEN
+// board row that doesn't have one, grouped into a shallow tree. Sub-issues nest under
+// a parent (explicit `Parent:` line, else the feature they belong to) — but only when a
+// group has 2+ members; a lone issue renders flat.
 function parseKnownIssues(decisions, board) {
-  const issues = [];
+  const raw = [];
   if (decisions) {
     for (const block of decisions.split(/^## /m).slice(1)) {
       if (!/^Type:\s*issue/im.test(block)) continue;
-      const raw = block.split('\n')[0].trim();
-      const title = (raw.match(/Issue:\s*(.+)$/i) || [])[1]?.trim() || raw.replace(/^[^—]*—\s*/, '');
+      const head = block.split('\n')[0].trim();
+      const title = (head.match(/Issue:\s*(.+)$/i) || [])[1]?.trim() || head.replace(/^[^—]*—\s*/, '');
       const status = ((block.match(/^Status:\s*(.+)$/im) || [])[1] || 'open').trim();
       const feature = ((block.match(/^Feature:\s*(.+)$/im) || [])[1] || '').trim();
-      issues.push({ title, feature, status, open: /^open/i.test(status) });
+      const parent = ((block.match(/^Parent:\s*(.+)$/im) || [])[1] || '').trim();
+      raw.push({ title, feature, parent, status, open: /^open/i.test(status) });
     }
   }
-  const covered = new Set(issues.filter((i) => i.open).map((i) => i.feature));
+  const covered = new Set(raw.filter((i) => i.open).map((i) => i.feature));
   for (const r of board) {
-    if (r.status === 'BROKEN' && !covered.has(r.id)) {
-      issues.push({ title: `${r.name} is broken`, feature: r.id, status: 'open', open: true });
-    }
+    if (r.status === 'BROKEN' && !covered.has(r.id)) raw.push({ title: `${r.name} is broken`, feature: r.id, parent: '', status: 'open', open: true });
   }
-  return { open: issues.filter((i) => i.open), fixed: issues.filter((i) => !i.open).slice(-6).reverse() };
+  const nameOf = (key) => (board.find((b) => b.id === key)?.name) || key;
+
+  const group = (items) => {
+    const byKey = new Map();
+    const order = [];
+    for (const it of items) {
+      const key = it.parent || it.feature;
+      if (!key) { order.push({ flat: it }); continue; }
+      if (!byKey.has(key)) { byKey.set(key, []); order.push({ key }); }
+      byKey.get(key).push(it);
+    }
+    const nodes = [];
+    for (const o of order) {
+      if (o.flat) { nodes.push({ ...o.flat, children: [] }); continue; }
+      const arr = byKey.get(o.key);
+      if (!arr) continue;
+      byKey.delete(o.key);                 // emit each group once, at first appearance
+      if (arr.length >= 2) nodes.push({ title: nameOf(o.key), feature: o.key, open: arr.some((a) => a.open), status: '', children: arr.map((a) => ({ ...a, children: [] })) });
+      else nodes.push({ ...arr[0], children: [] });
+    }
+    return nodes;
+  };
+
+  return { open: group(raw.filter((i) => i.open)), fixed: group(raw.filter((i) => !i.open).slice(-10)) };
 }
 
 async function snapshotState() {

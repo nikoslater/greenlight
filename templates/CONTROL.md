@@ -32,7 +32,19 @@ stable_threshold: 3               # consecutive passes → STABLE
 
 ## 0. Loop rules (critical — read every loop)
 
-**Do exactly ONE productive action per loop**, then log it. Pick the FIRST rung that applies.
+**Do ONE logical unit of work at a time, and commit it before starting the next.** Pick the
+FIRST rung that applies. A unit is normally one feature at one rung (build F-003; verify F-003),
+but it may cover several tightly-related changes when they genuinely belong together — the
+sub-items of one feature, one screen's set of buttons, a rename that touches its call sites.
+Group by logical cohesion, never by convenience: never bundle unrelated features into one unit.
+
+**Update the board and commit as you go — never in a batch at the end.** The moment a feature
+changes status (PLANNED→UNVERIFIED when built, →PASSING when proven, →BROKEN when it fails),
+write that §3 row and commit it *then*, before touching the next feature. A loop must never
+flip several features from PLANNED to PASSING in one final write — the board is a live progress
+bar, and each feature earns its status with its own evidence and its own commit. If you take on
+a group, still prove and commit each member as it lands, not all at once.
+
 (Two kinds of human-handoff bookkeeping do not by themselves consume a loop's productive
 action — do them as you notice them, then take the first work rung that applies: marking a
 feature BLOCKED with its ask in DECISIONS (and repeating the ask to the human); and applying an
