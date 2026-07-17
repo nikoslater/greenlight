@@ -216,7 +216,8 @@ answer, push, clean up, or start the next run.
 
 The board panel is the live truth: every feature's state (PLANNED → UNVERIFIED → PASSING →
 STABLE), the single next action, and the commit diary — every iteration that does work ends
-in a commit. (The one exception: an iteration with nothing to do but wait for an answer from
+in a commit. The **Known issues** tab tracks every bug you've reported — open ones
+highlighted, fixed ones showing the version that fixed them. (The one exception: an iteration with nothing to do but wait for an answer from
 you makes no commit.) The same truth is always in the files if you prefer a second terminal:
 `git log --oneline -10` and `cat greenlight/CONTROL.md`.
 
@@ -276,6 +277,15 @@ so it's permanent — if you disagree with one, tell the loop in the box and it'
 The loop has stopped itself: every feature stable, security checklist green, UI verified by
 real clicks. Try the app yourself, then fold the work into main:
 `git checkout main` then `git merge greenlight-build` then `git push`
+
+**...I found a bug AFTER greenlight?**
+GREENLIGHT is a checkpoint, not an ending. Just describe the bug in the box — the report is
+filed in the **Known issues** tab, the affected feature drops to BROKEN on the board, the
+header lamp goes back to working, and the loop fixes and re-proves it, bumping the version
+like always. When the board is green again, GREENLIGHT fires again — as many times as it
+takes. **Start loop** also works after greenlight: it checks for open issues and resumes if
+there are any (and correctly says "achieved" and stops if there aren't). The Known issues tab
+keeps the history: open bugs highlighted, closed ones showing which version fixed them.
 
 **...I merged my branch into `main` on GitHub (via a Pull Request) — how do I update my local `main`?**
 The merge happened on GitHub's copy, so your local `main` is now behind it. Switch to `main`

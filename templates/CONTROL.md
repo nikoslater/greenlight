@@ -57,6 +57,17 @@ in your reply, change nothing else, and stop looping — resume once they've ans
 appending to DECISIONS. This is the one iteration that legitimately makes no change and no
 commit — it is waiting, not working.
 
+**Maintenance (GREENLIGHT is a checkpoint, not an ending):** when the human reports a bug or
+asks for a change — mid-loop or after DONE, it makes no difference — file it in DECISIONS as
+`Type: issue` (title `Issue: <summary>`, a `Feature:` line naming the ID or `new`, `Status: open`),
+demote the affected feature to BROKEN on the §3 board (a new request instead becomes a PLANNED
+registry row with a Contract), and if `greenlight` was `"yes"` set it back to `"no"` (status
+re-evaluates from the board). Then walk the ladder as normal: the fix lands with its version
+bump, the feature re-proves to PASSING/STABLE, and when the board is green again the DONE rung
+fires again — GREENLIGHT can be re-achieved any number of times (the IDEATE round stays filed;
+a re-greenlight never needs a new one). When an issue's fix is proven, update its `Status:` to
+`fixed in vX.Y.Z` — that line, like an idea's, may be edited in place.
+
 **Statuses:** `PLANNED → UNVERIFIED → PASSING → STABLE`, plus `BROKEN`, `BLOCKED` (needs human — never guess), `RETIRED`. **"All STABLE" means every live feature is STABLE — RETIRED features are dead and excluded from every count.** BLOCKED counts differently per rung: for rung 7 (ROLLOVER) a BLOCKED feature is also excluded, because it has no contract yet and so has nothing for a retest milestone to re-prove — one unanswered ask must not pin the project below v1.0 forever. For rung 9 (DONE) it is *not* excluded: a BLOCKED feature is not STABLE and holds DONE until the human answers its DECISIONS ask and rung 3 takes it to STABLE or RETIRED. Any change to a feature demotes it to UNVERIFIED until re-proven. PASSING requires passing evidence from THIS loop, saved to `greenlight/state/evidence/`. UI features additionally require a fresh screenshot reviewed for broken layout.
 
 **Before finishing every loop:** bump `version` per the rule above if the app changed (do this first — the CHANGELOG and LEDGER both record it) → append CHANGELOG entry under that version → append LEDGER line per feature touched, same version → update §3 board + front-matter (counters, and `status` re-evaluated from the board) → rewrite §5 Next Action → file any decisions/ideas in DECISIONS.

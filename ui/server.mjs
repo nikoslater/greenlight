@@ -120,12 +120,35 @@ function parseAutoDecisions(decisions) {
   const out = [];
   for (const block of decisions.split(/^## /m).slice(1)) {
     if (!/Auto:\s*yes/i.test(block) && !/assumed/i.test(block)) continue;
-    const title = block.split('\n')[0].trim().replace(/^[\d\-T:.Z ]+—\s*/, '').replace(/^Auto decision:\s*/i, '');
+    const title = block.split('\n')[0].trim().replace(/^[^—]*—\s*/, '').replace(/^Auto decision:\s*/i, '');
     const chose = (block.match(/^Chose:\s*(.+)$/im) || [])[1] || '';
     const why = (block.match(/^Why:\s*(.+)$/im) || block.match(/^Call:\s*(.+)$/im) || [])[1] || '';
     out.push({ title, chose, why });
   }
   return out.slice(-40);
+}
+
+// Known issues: DECISIONS `Type: issue` entries (the durable record), plus any
+// BROKEN board row that doesn't have one yet.
+function parseKnownIssues(decisions, board) {
+  const issues = [];
+  if (decisions) {
+    for (const block of decisions.split(/^## /m).slice(1)) {
+      if (!/^Type:\s*issue/im.test(block)) continue;
+      const raw = block.split('\n')[0].trim();
+      const title = (raw.match(/Issue:\s*(.+)$/i) || [])[1]?.trim() || raw.replace(/^[^—]*—\s*/, '');
+      const status = ((block.match(/^Status:\s*(.+)$/im) || [])[1] || 'open').trim();
+      const feature = ((block.match(/^Feature:\s*(.+)$/im) || [])[1] || '').trim();
+      issues.push({ title, feature, status, open: /^open/i.test(status) });
+    }
+  }
+  const covered = new Set(issues.filter((i) => i.open).map((i) => i.feature));
+  for (const r of board) {
+    if (r.status === 'BROKEN' && !covered.has(r.id)) {
+      issues.push({ title: `${r.name} is broken`, feature: r.id, status: 'open', open: true });
+    }
+  }
+  return { open: issues.filter((i) => i.open), fixed: issues.filter((i) => !i.open).slice(-6).reverse() };
 }
 
 async function snapshotState() {
@@ -148,6 +171,7 @@ async function snapshotState() {
     security: parseSecurity(control),
     openAsks: parseOpenAsks(decisions, board),
     autoDecisions: parseAutoDecisions(decisions),
+    knownIssues: parseKnownIssues(decisions, board),
     branch: await exec('git', ['branch', '--show-current']),
     commits: ((await exec('git', ['log', '--oneline', '-12'])) || '').split('\n').filter(Boolean),
   };
@@ -206,6 +230,28 @@ let currentQuery = null;
 let usageTimer = null;
 let lastUsage = null;
 
+// A poll sometimes omits a window the previous poll had (the endpoint is not
+// perfectly consistent); naively replacing the bars makes meters blink in and
+// out. Merge instead: a bar missing from this reading keeps its last value.
+function mergeUsage(prev, next) {
+  if (!prev) return next;
+  const byLabel = new Map((next.bars || []).map((b) => [b.label, b]));
+  const merged = [];
+  for (const old of prev.bars || []) {
+    merged.push(byLabel.get(old.label) || old);
+    byLabel.delete(old.label);
+  }
+  for (const b of next.bars || []) if (byLabel.has(b.label)) merged.push(b);
+  return {
+    ...next,
+    bars: merged,
+    available: next.available || prev.available,
+    billing: next.billing || prev.billing,
+    cost: next.cost ?? prev.cost,
+    subscription: next.subscription || prev.subscription,
+  };
+}
+
 function normalizeUsage(u, acct) {
   const rl = u.rate_limits || {};
   const bars = [];
@@ -237,7 +283,7 @@ async function pollUsageOnce() {
     const u = await fn.call(q);
     let acct = null;
     try { acct = await q.accountInfo?.(); } catch { /* optional */ }
-    lastUsage = normalizeUsage(u, acct);
+    lastUsage = mergeUsage(lastUsage, normalizeUsage(u, acct));
     broadcast('usage', lastUsage);
   } catch { /* session closing or API changed — ignore, keep last reading */ }
 }
@@ -423,10 +469,22 @@ function preamble() {
   return p;
 }
 
+// A message typed while idle isn't just chat — after GREENLIGHT it's usually a bug
+// report, and it must flow through Greenlight's books, not around them.
+const MAINTENANCE_NOTE =
+  'This project runs on Greenlight (docs in greenlight/). If the message below reports a bug ' +
+  'or problem with the app, or asks for a change: follow CONTROL.md §0\'s Maintenance rule — ' +
+  'file a `Type: issue` entry in greenlight/DECISIONS.md (title `Issue: <summary>`, Feature:, ' +
+  'Status: open), demote the affected feature(s) to BROKEN on the §3 board (a new request ' +
+  'becomes a PLANNED registry row with a Contract), set `greenlight: "no"` if it was "yes", and ' +
+  'commit that bookkeeping. Then continue by running the loop protocol in ' +
+  'greenlight/prompts/loop.md to fix and re-prove it. If the message is just a question or ' +
+  'comment, answer it and change nothing.\n\nThe human says: ';
+
 async function startMode(mode, text) {
   if (session.active || session.starting) return { error: 'A session is already running. Stop it first.' };
   session.starting = true;     // synchronous guard: blocks a second click during the awaits below
-  if (mode === 'chat') { runSession('chat', preamble() + text); return {}; }
+  if (mode === 'chat') { runSession('chat', preamble() + MAINTENANCE_NOTE + text); return {}; }
   const file = mode === 'bootstrap' ? 'prompts/bootstrap.md' : 'prompts/loop.md';
   const prompt = await readIf(path.join(GL_DIR, file));
   if (!prompt) { session.starting = false; return { error: `${file} not found — is Greenlight installed in this project?` }; }
@@ -485,6 +543,16 @@ async function runMock() {
   }
   await sleep(500);
   broadcast('claude', { text: 'Committed. Next action: harden SEC-001 toward 3/3.' });
+  // second usage poll that omits the Fable window — the merge must keep the bar
+  lastUsage = mergeUsage(lastUsage, {
+    subscription: 'max', available: true, cost: 0.51,
+    billing: { charged: false, text: 'On your max plan — counts against your plan limits, not billed per token.' },
+    bars: [
+      { label: 'Session (5h)', pct: 41, resets: null },
+      { label: 'Weekly', pct: 62, resets: null },
+    ],
+  });
+  broadcast('usage', lastUsage);
   broadcast('done', { subtype: 'success', cost: 0.42 });
   session.active = false;
   broadcast('session', { status: 'idle' });

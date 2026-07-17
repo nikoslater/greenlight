@@ -335,6 +335,23 @@ function renderState(s) {
 
   stateDecisions = s.autoDecisions || [];
   renderDecisions();
+  renderIssues(s.knownIssues || { open: [], fixed: [] });
+}
+
+function renderIssues(ki) {
+  const open = ki.open || [];
+  const fixed = ki.fixed || [];
+  $('iss-count').textContent = open.length || '';
+  $('iss-empty').hidden = open.length + fixed.length > 0;
+  $('iss-list').innerHTML =
+    open.map((i) => `<div class="iss open">
+        <div class="iss-title">${esc(i.title)}</div>
+        <div class="iss-meta">${i.feature ? `<span class="mono">${esc(i.feature)}</span> · ` : ''}<span class="iss-open">open</span></div>
+      </div>`).join('') +
+    fixed.map((i) => `<div class="iss">
+        <div class="iss-title">${esc(i.title)}</div>
+        <div class="iss-meta">${i.feature ? `<span class="mono">${esc(i.feature)}</span> · ` : ''}<span class="iss-fixed">${esc(i.status)}</span></div>
+      </div>`).join('');
 }
 
 /* -------------------------------------------------------------- controls */
@@ -379,6 +396,7 @@ document.querySelectorAll('.tab').forEach((t) => {
     document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('on', x === t));
     const tab = t.dataset.tab;
     $('feed').hidden = tab !== 'feed';
+    $('issues').hidden = tab !== 'issues';
     $('decisions').hidden = tab !== 'decisions';
   };
 });

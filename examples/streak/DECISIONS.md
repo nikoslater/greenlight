@@ -72,6 +72,13 @@ Context: the contract says never more than one nudge per day; cron retries could
 Call: a `nudges_sent(user_id, date)` unique-constraint table is checked before send — idempotent by
 construction, not by timing. Send failures log the Resend error ID, never the user's email address.
 
+## 2026-02-20T09:40Z loop=21 — Issue: streak double-counts the DST spring-forward day
+Type: issue
+Feature: F-002
+Context: the verify pass caught the count going up twice across the spring-forward boundary —
+the shared helper introduced at v1.1.0 cuts days at UTC midnight instead of local.
+Status: fixed in v1.1.1
+
 ## 2026-02-20T10:30Z loop=22 — Postmortem: the shared timezone helper broke F-002
 Type: decision
 Context: the F-004 build (v1.1.0) needed the day boundary for its 19:00-local cron and pulled F-002's

@@ -1,20 +1,25 @@
 # DECISIONS.md — append-only rationale, feature ideas, security calls
 
 > Why things are the way they are. Append-only — never edit or delete a past entry — with
-> ONE exception: an idea entry's `Status:` line is a live pointer to that idea's fate and may
-> be updated in place as it moves (pending review → approved → promoted/rejected). Everything
-> else, once written, stays. This is where the loop "thinks out loud" so a future session
-> inherits the reasoning, not just the result.
+> ONE exception: an idea's or issue's `Status:` line is a live pointer to its fate and may be
+> updated in place (ideas: pending review → approved → promoted/rejected; issues: open →
+> fixed in vX.Y.Z). Everything else, once written, stays. This is where the loop "thinks out
+> loud" so a future session inherits the reasoning, not just the result.
 
 Use one block per entry:
 
 ```
 ## [timestamp] loop=N — <short title>
-Type: decision | idea | security | blocker
+Type: decision | idea | security | blocker | issue
 Context: ...
 Call: ...
+Feature: (for issues) F-0XX or 'new'
 Status: (for ideas) pending review | approved | promoted to F-0XX | rejected
+        (for issues) open | fixed in vX.Y.Z
 ```
+
+Issue entries are the project's known-issues list: anything the human reports (before or
+after GREENLIGHT) gets one, titled `Issue: <summary>`, and stays `open` until its fix is proven.
 
 ---
 

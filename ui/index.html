@@ -33,9 +33,16 @@
   <section id="feed-pane">
     <div class="tabs">
       <button class="tab on" data-tab="feed">Live</button>
+      <button class="tab" data-tab="issues">Known issues <span class="tabcount" id="iss-count"></span></button>
       <button class="tab" data-tab="decisions">Decisions <span class="tabcount" id="dec-count"></span></button>
     </div>
     <div id="feed" aria-live="polite"></div>
+    <div id="issues" hidden>
+      <p class="dec-empty" id="iss-empty">No known issues. Spot a bug — mid-loop or after
+      GREENLIGHT — and just describe it in the box below: it gets filed here, the feature drops
+      to BROKEN on the board, and the loop fixes and re-proves it.</p>
+      <div id="iss-list"></div>
+    </div>
     <div id="decisions" hidden>
       <p class="dec-empty" id="dec-empty">No auto-decisions yet. Turn on <strong>auto-decide</strong> and start the
       loop — every call it makes on your behalf shows up here with its reasoning, and is saved to
