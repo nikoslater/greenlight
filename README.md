@@ -194,7 +194,8 @@ hits a decision only you can make.
 
 **Prefer the terminal?** The dashboard is optional — the same two prompts run directly in
 Claude Code: `claude "$(cat greenlight/prompts/bootstrap.md)"` once, then
-`claude "$(cat greenlight/prompts/loop.md)"` for the loop. Pin a model with
+`claude "$(cat greenlight/prompts/loop.md)"` for the loop. You answer its questions inline
+as usual; the review-each-change and auto-decide toggles are dashboard-only. Pin a model with
 `ANTHROPIC_MODEL=claude-opus-4-8` before either command (the dashboard honors it too).
 
 ---
@@ -303,8 +304,10 @@ on — and tell it what to do about it in the box.
   session live, turns Claude's questions into buttons, gates changes behind Allow/Deny when
   review mode is on, and — in **auto-decide** mode — lets the loop answer its own questions
   and compiles every executive decision (with rationale) into a Decisions tab. It renders
-  the board straight from the files below; it displays state, it never owns it. Everything
-  works identically from a plain terminal.
+  the board straight from the files below; it displays state, it never owns it. The loop
+  itself runs identically without it — the terminal path (below) builds the same app; you
+  just answer questions inline instead of with buttons, and the review/auto-decide toggles
+  are dashboard-only.
 - **CONTROL.md** — the brain: what the app is, every feature's live status, a strict
   priority ladder (security first, regressions second), and the single next step.
 - **STANDARDS.md** — how the code must be written: security rules, the
