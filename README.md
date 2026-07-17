@@ -186,6 +186,9 @@ hits a decision only you can make.
   Come back later, open that tab, and read exactly what it chose and why. (auto-decide and
   review are independent: you can let it decide questions on its own but still approve
   changes, or any combination.)
+- **Pick the model** from the dropdown at the top left — Default, Opus 4.8, Sonnet 5, Haiku
+  4.5, or Fable 5. Your choice is remembered across restarts, applies to the next run, and
+  switches the *running* loop live if you change it mid-session.
 - **Steer anytime**: type in the box — "focus on the dashboard feature next", "don't use
   that library" — it course-corrects.
 - **Stop** button halts the session safely. The files are the loop's memory, so stopping is
@@ -197,8 +200,9 @@ hits a decision only you can make.
 **Prefer the terminal?** The dashboard is optional — the same two prompts run directly in
 Claude Code: `claude "$(cat greenlight/prompts/bootstrap.md)"` once, then
 `claude "$(cat greenlight/prompts/loop.md)"` for the loop. You answer its questions inline
-as usual; the review-each-change and auto-decide toggles are dashboard-only. Pin a model with
-`ANTHROPIC_MODEL=claude-opus-4-8` before either command (the dashboard honors it too).
+as usual; the model dropdown, review-each-change, and auto-decide are dashboard-only. In the
+terminal, pin a model with `ANTHROPIC_MODEL=claude-opus-4-8` before either command (or `/model`
+inside the session); the dashboard's dropdown is the easy equivalent.
 
 ---
 

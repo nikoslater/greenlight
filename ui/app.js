@@ -306,6 +306,23 @@ $('auto').onchange = (e) => {
     : 'auto-decide OFF — the loop will ask you again.', 'sysline');
 };
 
+function fillModels(models, selected) {
+  const sel = $('model');
+  if (!sel.dataset.filled) {
+    sel.innerHTML = (models || [])
+      .map((m) => `<option value="${esc(m.value)}">${esc(m.label)}${m.note ? ` — ${esc(m.note)}` : ''}</option>`)
+      .join('');
+    sel.dataset.filled = '1';
+  }
+  if (selected != null) sel.value = selected;
+}
+$('model').onchange = (e) => {
+  post('/model', { value: e.target.value });
+  const label = e.target.selectedOptions[0]?.textContent.split(' — ')[0] || e.target.value;
+  add(`model set to ${label}${loopRunning() ? ' — applied to the running loop' : ' — used next time you start the loop'}.`, 'sysline');
+};
+function loopRunning() { return $('btn-loop').disabled; }   // Start is disabled while running
+
 document.querySelectorAll('.tab').forEach((t) => {
   t.onclick = () => {
     document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('on', x === t));
@@ -331,6 +348,7 @@ es.onmessage = (e) => {
   if (evt.type === 'hello') {
     feed.innerHTML = '';
     liveDecisions.length = 0;
+    fillModels(evt.data.models, evt.data.selectedModel);
     (evt.data.history || []).forEach(renderEvent);
     setRunning(!!evt.data.session?.active);
     $('review').checked = !!evt.data.session?.review;
@@ -338,6 +356,7 @@ es.onmessage = (e) => {
     return;
   }
   if (evt.type === 'state') return renderState(evt.data);
+  if (evt.type === 'model') { fillModels(null, evt.data.selected); return; }
   if (evt.type === 'session') {
     setRunning(evt.data.status === 'running');
     if (typeof evt.data.review === 'boolean') $('review').checked = evt.data.review;

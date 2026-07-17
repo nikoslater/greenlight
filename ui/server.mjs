@@ -32,6 +32,28 @@ const readIf = async (p) => {
   try { return await fsp.readFile(p, 'utf8'); } catch { return null; }
 };
 
+// ------------------------------------------------------------------- model
+// The picker uses stable aliases the SDK accepts, so it works before any
+// session runs. '' / 'default' means "let your account default decide".
+
+const MODELS = [
+  { value: 'default', label: 'Default', note: 'your account default' },
+  { value: 'opus', label: 'Opus 4.8', note: 'most capable' },
+  { value: 'sonnet', label: 'Sonnet 5', note: 'fast, efficient' },
+  { value: 'haiku', label: 'Haiku 4.5', note: 'fastest, lightest' },
+  { value: 'claude-fable-5', label: 'Fable 5', note: 'Opus quality, faster output' },
+];
+const MODEL_PREF = path.join(GL_DIR, 'state', 'ui-model');
+
+function loadModelPref() {
+  try { return fs.readFileSync(MODEL_PREF, 'utf8').trim(); } catch { return process.env.ANTHROPIC_MODEL || 'default'; }
+}
+function saveModelPref(v) {
+  try { fs.mkdirSync(path.dirname(MODEL_PREF), { recursive: true }); fs.writeFileSync(MODEL_PREF, v); } catch { /* non-fatal */ }
+}
+let selectedModel = loadModelPref();
+const modelOption = () => (selectedModel && selectedModel !== 'default' ? { model: selectedModel } : {});
+
 // ------------------------------------------------------- project state view
 // The dashboard never invents state: it renders what the Greenlight files say.
 
@@ -342,7 +364,7 @@ async function runSession(mode, firstMessage) {
         settingSources: ['user', 'project', 'local'],
         canUseTool,
         hooks: { PreToolUse: [{ hooks: [preToolUse] }] },
-        ...(process.env.ANTHROPIC_MODEL ? { model: process.env.ANTHROPIC_MODEL } : {}),
+        ...modelOption(),
       },
     });
     currentQuery = q;
@@ -503,7 +525,7 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/events') {
     res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
     clients.add(res);
-    res.write(`data: ${JSON.stringify({ type: 'hello', data: { history, session: { active: session.active, mode: session.mode, review: session.review, auto: session.auto } } })}\n\n`);
+    res.write(`data: ${JSON.stringify({ type: 'hello', data: { history, models: MODELS, selectedModel, session: { active: session.active, mode: session.mode, review: session.review, auto: session.auto } } })}\n\n`);
     if (lastUsage) res.write(`data: ${JSON.stringify({ type: 'usage', data: lastUsage })}\n\n`);
     snapshotState().then((s) => res.write(`data: ${JSON.stringify({ type: 'state', data: s })}\n\n`));
     req.on('close', () => clients.delete(res));
@@ -550,6 +572,17 @@ const server = http.createServer(async (req, res) => {
       session.auto = !!b.on;
       broadcast('session', { status: session.active ? 'running' : 'idle', mode: session.mode, review: session.review, auto: session.auto });
       return send(200, {});
+    }
+    if (url.pathname === '/model') {
+      if (MODELS.some((m) => m.value === b.value)) {
+        selectedModel = b.value;
+        saveModelPref(selectedModel);
+        if (currentQuery?.setModel) {
+          try { await currentQuery.setModel(selectedModel === 'default' ? undefined : selectedModel); } catch { /* applies next run */ }
+        }
+        broadcast('model', { selected: selectedModel });
+      }
+      return send(200, { selected: selectedModel });
     }
     return send(404, { error: 'unknown endpoint' });
   }

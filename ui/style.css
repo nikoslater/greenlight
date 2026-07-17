@@ -58,6 +58,19 @@ header {
 .meta { color: var(--ink-40); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .controls { display: flex; align-items: center; gap: 10px; flex: none; }
+
+.model-select {
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--ink-15);
+  border-radius: 6px;
+  padding: 6px 8px;
+  max-width: 190px;
+}
+.model-select:hover { border-color: var(--accent); }
+.model-select:focus { outline: none; border-color: var(--ink); }
 .review { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-40); }
 .review input { accent-color: var(--accent); }
 
