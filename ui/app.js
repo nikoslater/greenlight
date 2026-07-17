@@ -86,6 +86,7 @@ function renderEvent(evt) {
     renderDecisions();
     add(`<span class="chip">✓ auto-decided <b>${esc(data.title)}</b> → ${esc(data.chose)}</span>`, '');
   }
+  if (type === 'usage') renderUsage(data);
   if (type === 'question-answered') {
     const first = Object.values(data.answers || {})[0];
     settleNewestOpen('question', first ? `you chose: ${first}` : 'answered');
@@ -207,6 +208,41 @@ function renderApproval(data) {
 }
 
 /* ------------------------------------------------------------ board panel */
+
+function resetsIn(iso) {
+  if (!iso) return '';
+  const ms = new Date(iso).getTime() - Date.now();
+  if (isNaN(ms) || ms <= 0) return '';
+  const h = Math.floor(ms / 3.6e6);
+  const d = Math.floor(h / 24);
+  return d >= 1 ? ` · resets in ${d}d` : ` · resets in ${h}h`;
+}
+
+function renderUsage(u) {
+  if (!u) return;
+  $('usage-card').hidden = false;
+  const bill = $('billing');
+  bill.textContent = u.billing?.text || '';
+  bill.classList.toggle('charged', !!u.billing?.charged);
+
+  if (u.available && (u.bars || []).length) {
+    $('usage-bars').innerHTML = (u.bars || [])
+      .map((b) => {
+        const pct = Math.max(0, Math.min(100, b.pct ?? 0));
+        const hot = pct >= 90 ? ' hot' : pct >= 70 ? ' warm' : '';
+        return `<div class="ubar">
+          <div class="ubar-top"><span>${esc(b.label)}</span><span class="ubar-pct">${pct}%${esc(resetsIn(b.resets))}</span></div>
+          <div class="ubar-track"><div class="ubar-fill${hot}" style="width:${pct}%"></div></div>
+        </div>`;
+      })
+      .join('');
+  } else {
+    $('usage-bars').innerHTML =
+      '<p class="sub">Live limit bars need a claude.ai subscription login. If you signed in with your plan, they\'ll appear once the loop starts; they don\'t apply to API-key sessions.</p>';
+  }
+  $('usage-cost').textContent =
+    u.cost != null ? `This session: ~$${Number(u.cost).toFixed(2)} of usage${u.billing?.charged ? ' (billed)' : ' (counts against your plan)'}.` : '';
+}
 
 function renderState(s) {
   $('notready').hidden = !!s.bootstrapped;

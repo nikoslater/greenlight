@@ -148,7 +148,9 @@ you want the branch on GitHub updated.
 Your browser opens one window (the first run installs the dashboard, about a minute). On the
 left: a live feed of everything Claude does and says, with a box to talk back. On the right:
 the project board — every feature and its status, the single next action, the security
-checklist, recent commits, and anything waiting on you.
+checklist, recent commits, anything waiting on you, and a **Plan usage** panel with live bars
+for your session (5-hour), weekly, and per-model (e.g. Fable) limits — the same numbers
+claude.ai shows — plus a line confirming you're on your plan and not billed per token.
 
 Click **Bootstrap** — the one-time setup conversation:
 
@@ -250,6 +252,16 @@ then keeps working on other things. Blocked items also sit in the board's "Waiti
 card until resolved. (If the ask is the ONLY thing left, the loop stops and waits — answer,
 then click Start loop.)
 
+**...am I being charged per token, and how much of my plan have I used?**
+The dashboard runs on **your Claude Code login**, not an API key — so it uses your Claude
+subscription exactly like the `claude` terminal does, and does **not** bill a separate API
+account. The **Plan usage** panel confirms this every time: it says which plan you're on and
+shows live bars for your session (5-hour), weekly, and per-model limits, refreshing as the
+loop runs. The "~$X of usage" figure is just the value of the tokens used — on a subscription
+it counts against your plan, it is not a charge. (The only way it would bill per token is if
+you have an `ANTHROPIC_API_KEY` set in your shell — then the panel turns that line red and
+warns you. Unset it to force plan usage: `unset ANTHROPIC_API_KEY`.)
+
 **...I ran it in auto-decide mode — what did it decide while I was away?**
 Open the **Decisions** tab. Every call the loop made on your behalf is there: the question,
 what it chose, and why (it favors reversible choices, so most are easy to change your mind
@@ -303,9 +315,11 @@ on — and tell it what to do about it in the box.
   Claude Code through the official Agent SDK using your existing login. It streams the
   session live, turns Claude's questions into buttons, gates changes behind Allow/Deny when
   review mode is on, and — in **auto-decide** mode — lets the loop answer its own questions
-  and compiles every executive decision (with rationale) into a Decisions tab. It renders
-  the board straight from the files below; it displays state, it never owns it. The loop
-  itself runs identically without it — the terminal path (below) builds the same app; you
+  and compiles every executive decision (with rationale) into a Decisions tab. It reads your
+  live plan usage (session/weekly/per-model limits) from the SDK and confirms you're on your
+  subscription, not an API key. It renders the board straight from the files below; it
+  displays state, it never owns it. The loop itself runs identically without it — the
+  terminal path (below) builds the same app; you
   just answer questions inline instead of with buttons, and the review/auto-decide toggles
   are dashboard-only.
 - **CONTROL.md** — the brain: what the app is, every feature's live status, a strict

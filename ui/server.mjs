@@ -175,6 +175,51 @@ const MUTATING = new Set(['Edit', 'Write', 'MultiEdit', 'NotebookEdit', 'Bash'])
 
 let sessionEpoch = 0;
 
+// ------------------------------------------------------------- plan usage
+// The Agent SDK reports the account's rate-limit windows (5-hour session, 7-day
+// weekly, per-model incl. Fable) and whether this is a subscription or an API key.
+// We poll it during a live session and cache the last reading for the usage panel.
+
+let currentQuery = null;
+let usageTimer = null;
+let lastUsage = null;
+
+function normalizeUsage(u, acct) {
+  const rl = u.rate_limits || {};
+  const bars = [];
+  const add = (label, w) => { if (w && w.utilization != null) bars.push({ label, pct: Math.round(w.utilization), resets: w.resets_at }); };
+  add('Session (5h)', rl.five_hour);
+  add('Weekly', rl.seven_day);
+  add('Weekly · Opus', rl.seven_day_opus);
+  add('Weekly · Sonnet', rl.seven_day_sonnet);
+  for (const m of rl.model_scoped || []) add(m.display_name || 'Model', m);
+
+  const sub = u.subscription_type;                       // 'pro'|'max'|'team'|'enterprise'|null
+  const provider = acct?.apiProvider;                    // 'firstParty' for claude.ai
+  const tokenSrc = acct?.tokenSource || '';
+  const apiKey = /API_KEY/i.test(tokenSrc) || (provider && provider !== 'firstParty');
+  let billing;
+  if (sub) billing = { charged: false, text: `On your ${sub} plan — counts against your plan limits, not billed per token.` };
+  else if (apiKey) billing = { charged: true, text: '⚠ Using an API key — this bills your Anthropic API account per token.' };
+  else billing = { charged: false, text: 'Signed in with your Claude login (first-party) — not billed per token.' };
+
+  return { subscription: sub || null, available: !!u.rate_limits_available, bars, cost: u.session?.total_cost_usd ?? null, billing };
+}
+
+async function pollUsageOnce() {
+  const q = currentQuery;
+  if (!q || !session.active) return;
+  try {
+    const fn = q.usage_EXPERIMENTAL_MAY_CHANGE_DO_NOT_RELY_ON_THIS_API_YET;
+    if (typeof fn !== 'function') return;
+    const u = await fn.call(q);
+    let acct = null;
+    try { acct = await q.accountInfo?.(); } catch { /* optional */ }
+    lastUsage = normalizeUsage(u, acct);
+    broadcast('usage', lastUsage);
+  } catch { /* session closing or API changed — ignore, keep last reading */ }
+}
+
 function pushUser(text) {
   session.inbox.push({
     type: 'user',
@@ -300,6 +345,9 @@ async function runSession(mode, firstMessage) {
         ...(process.env.ANTHROPIC_MODEL ? { model: process.env.ANTHROPIC_MODEL } : {}),
       },
     });
+    currentQuery = q;
+    setTimeout(pollUsageOnce, 2500);                 // once the session is live
+    usageTimer = setInterval(pollUsageOnce, 30000);  // then keep it fresh
     for await (const m of q) {
       if (m.type === 'assistant') {
         for (const b of m.message.content) {
@@ -326,6 +374,8 @@ async function runSession(mode, firstMessage) {
     session.wake?.();          // wake the generator so it observes the end and returns
     for (const resolve of session.pending.values()) resolve({ allow: false, answers: {} });
     session.pending.clear();
+    currentQuery = null;
+    clearInterval(usageTimer);
     broadcast('session', { status: 'idle' });
     stateChanged();
   }
@@ -370,6 +420,16 @@ async function runMock() {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   session.active = true;
   broadcast('session', { status: 'running', mode: 'loop' });
+  lastUsage = {
+    subscription: 'max', available: true, cost: 0.42,
+    billing: { charged: false, text: 'On your max plan — counts against your plan limits, not billed per token.' },
+    bars: [
+      { label: 'Session (5h)', pct: 38, resets: null },
+      { label: 'Weekly', pct: 61, resets: null },
+      { label: 'Fable', pct: 22, resets: null },
+    ],
+  };
+  broadcast('usage', lastUsage);
   await sleep(600);
   broadcast('claude', { text: 'Loop 7 — reading CONTROL.md and the ledger tails.' });
   broadcast('tool', { name: 'Read', label: 'greenlight/CONTROL.md' });
@@ -444,6 +504,7 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
     clients.add(res);
     res.write(`data: ${JSON.stringify({ type: 'hello', data: { history, session: { active: session.active, mode: session.mode, review: session.review, auto: session.auto } } })}\n\n`);
+    if (lastUsage) res.write(`data: ${JSON.stringify({ type: 'usage', data: lastUsage })}\n\n`);
     snapshotState().then((s) => res.write(`data: ${JSON.stringify({ type: 'state', data: s })}\n\n`));
     req.on('close', () => clients.delete(res));
     return;
