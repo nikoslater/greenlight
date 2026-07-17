@@ -16,7 +16,10 @@ Climb in order; stop at the first rung that holds:
 5. Can it be one line? → one line
 6. Only then: write the minimum that works
 Never cut on the way down: input validation at trust boundaries, error handling that prevents data loss, security measures, accessibility basics. Lazy, not negligent. Every line not written is a line never reviewed, tested, or broken.
-*(This is the ponytail ladder — if the harness is Claude Code, install the ponytail plugin so it's enforced every turn.)*
+*(This is the [ponytail](https://github.com/DietrichGebert/ponytail) ladder. If the harness is
+Claude Code, install the plugin so it's enforced every turn — run `claude`, then
+`/plugin marketplace add DietrichGebert/ponytail`, then `/plugin install ponytail@ponytail`.
+Its `/ponytail-review` command audits a diff against the ladder; use it before merging a build.)*
 
 **Code**
 - Small modules, one responsibility each; business logic separate from I/O and UI so it's unit-testable without a running server.

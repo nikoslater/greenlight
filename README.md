@@ -7,6 +7,11 @@ you the important questions in plain English, sets the project up the way a seni
 engineering team would, and then a loop builds, tests, and fixes it step by step — until
 everything is proven stable and it tells you: **GREENLIGHT ACHIEVED.**
 
+You watch it all happen in the **Greenlight dashboard** — a local one-window app where you
+see Claude work in real time, watch every feature's status change, answer its questions with
+buttons, and (if you want) approve every change before it happens. No terminal-watching, no
+refreshing GitHub to see what changed.
+
 ## Why this exists
 
 AI-built ("vibe-coded") apps tend to fail the same ways: security bolted on too late, a
@@ -16,7 +21,7 @@ cards, glowing gradients, buttons that do nothing. Greenlight is a set of files 
 prompts that make the AI behave like a disciplined senior team instead.
 
 Everything Greenlight generates lives in a single `greenlight/` folder — prompts, templates,
-the working docs it produces, its runner, and runtime state (`greenlight/state/`, gitignored).
+the working docs it produces, and runtime state (`greenlight/state/`, gitignored).
 The only things it adds to your repo root are two small housekeeping touches: a couple of
 lines in `.gitignore` and a `.env.example` if you don't already have one. Your actual
 source tree stays yours.
@@ -50,8 +55,22 @@ claude
 ```
 
 The first bare `claude` run walks you through logging in with your Anthropic account in a
-browser. Once you're in, type `/exit`. Do this before ever starting a loop — the loop runs
-Claude non-interactively and cannot handle a login prompt.
+browser. Once you're in, type `/exit`. Do this before ever starting a loop — the dashboard
+drives Claude with your login, and can't handle the first-time login prompt itself.
+
+**4. Install Node.js** (powers the dashboard). Check with `node --version` — if that prints
+v18 or higher you're done. Otherwise grab the LTS installer from
+[nodejs.org](https://nodejs.org) and run it.
+
+**5. Recommended — install the ponytail plugin.** [Ponytail](https://github.com/DietrichGebert/ponytail)
+makes the agent code like the laziest senior dev in the room: the best code is the code never
+written. Greenlight's standards are built around its ladder, and the plugin enforces it every
+turn. Run `claude`, then type these two commands, then `/exit`:
+
+```
+/plugin marketplace add DietrichGebert/ponytail
+/plugin install ponytail@ponytail
+```
 
 **Terminal tips for the road:** don't paste lines containing `#` comments into zsh (it
 treats them as arguments, not comments — or run `setopt interactive_comments` once to allow
@@ -76,8 +95,9 @@ git init
 # 2. Install Greenlight:
 curl -fsSL https://raw.githubusercontent.com/nikoslater/greenlight/main/install.sh | bash
 
-# 3. Commit once (this creates `main`)...
+# 3. Commit once, and make sure your base branch is named `main`:
 git add -A && git commit -m "Set up Greenlight"
+git branch -M main
 
 # 4. ...then branch — the loop does ALL its work here, never on main:
 git checkout -b greenlight-build
@@ -114,96 +134,94 @@ git push -u origin greenlight-build     # pushes the branch to your existing Git
 
 Then on GitHub, open a Pull Request from `greenlight-build` into `main`. All of Greenlight's
 commits stay isolated on the branch — nothing reaches your `main` until you merge the PR. If
-the loop is still running, pushing is safe during a safe window (see below); push again
-whenever you want the branch on GitHub updated.
+the loop is still running, pushing from a second terminal tab is safe; push again whenever
+you want the branch on GitHub updated.
 
 ---
 
-## Part 2 — Bootstrap (one interactive conversation)
+## Part 2 — Open the dashboard and bootstrap
 
 ```bash
-claude "$(cat greenlight/prompts/bootstrap.md)"
+./greenlight/ui/start.sh
 ```
 
-This opens a live chat session, not the loop:
+Your browser opens one window (the first run installs the dashboard, about a minute). On the
+left: a live feed of everything Claude does and says, with a box to talk back. On the right:
+the project board — every feature and its status, the single next action, the security
+checklist, recent commits, and anything waiting on you.
 
-- **New idea?** Paste your braindump when asked. It will reflect the idea back, ask the
-  one-way-door questions (each with a suggested default, so "go with your suggestions"
-  always works), propose a lean v1 feature list, and **wait for your "go"** before
-  scaffolding anything.
+Click **Bootstrap** — the one-time setup conversation:
+
+- **New idea?** Type your braindump into the box when it asks. It reflects the idea back,
+  asks the one-way-door questions **as cards with buttons** (each option explained, and
+  "go with your suggestions" always works), proposes a lean v1 feature list, and waits for
+  your go before scaffolding anything.
 - **Existing codebase?** It studies your code and fills in the Greenlight docs from reality,
   fixing nothing yet.
 
-When it finishes its summary, type `/exit`. Your project now has its brain:
-`greenlight/CONTROL.md` (features, statuses, next action) and its rulebooks
-(`STANDARDS.md`, `STACKS.md`, `DESIGN.md`) alongside it.
+When it finishes, the right-hand board lights up with your feature list — that's your
+project's brain (`greenlight/CONTROL.md`), and from now on you watch it change in real time.
 
 ---
 
 ## Part 3 — Run the loop
 
-```bash
-./greenlight/run-loop.sh 300
-```
+Click **Start loop**. That's it.
 
-Each cycle runs ONE work step (build a feature, run its tests, fix what broke, save
-evidence, commit) and then waits. The terminal narrates:
+Each iteration walks the priority ladder, does ONE work step (build a feature, run its
+tests, fix what broke, save evidence), commits it, and rolls into the next — while the feed
+narrates and the board updates live. It stops itself when the app is done
+(**GREENLIGHT ACHIEVED** — the header lamp turns green), or asks you with buttons when it
+hits a decision only you can make.
 
-```
-[14:02:11] iteration started — MID-FLIGHT, don't edit the repo until it finishes
-[14:07:48] iteration finished — safe window (next one in 300s)
-```
+- **Want to approve every change?** Turn on **review each change** (top right). Every file
+  edit and command then waits for your Allow/Deny click. Leave it off to let the loop run
+  free — questions still come to you either way.
+- **Want to walk away entirely?** Turn on **auto-decide**. Instead of stopping to ask you,
+  the loop makes each call itself — using its judgment plus Greenlight's standards, favoring
+  reversible choices — and logs every executive decision, with its reasoning, in the
+  **Decisions** tab (and in `greenlight/DECISIONS.md`, so it's committed to your project).
+  Come back later, open that tab, and read exactly what it chose and why. (auto-decide and
+  review are independent: you can let it decide questions on its own but still approve
+  changes, or any combination.)
+- **Steer anytime**: type in the box — "focus on the dashboard feature next", "don't use
+  that library" — it course-corrects.
+- **Stop** button halts the session safely. The files are the loop's memory, so stopping is
+  always safe: Start loop later and it picks up exactly where the ledgers say it left off.
+- **Overnight (Mac):** system sleep pauses the loop, so start the dashboard with
+  `caffeinate -is ./greenlight/ui/start.sh` to keep the machine awake while it runs. Lid
+  open, plugged in.
 
-- The number is seconds between iterations. `300` = one step every 5 minutes, good for
-  keeping an eye on it. A small number like `15` runs back-to-back — faster progress, but
-  it burns through your usage quota quickly and you'll review the work in one pile at the
-  end instead of as it happens.
-- To pin a specific model: `ANTHROPIC_MODEL=claude-opus-4-8 ./greenlight/run-loop.sh 300`
-- The loop stops itself when the app is done ("GREENLIGHT ACHIEVED") — or stop it anytime
-  with **Ctrl-C**, ideally during a safe window.
-
-**Running it overnight (Mac):** the screen turning off is fine, but system sleep pauses the
-loop and can kill an in-flight iteration. Prefix the command with macOS's built-in
-`caffeinate` to keep the machine awake exactly as long as the loop runs:
-
-```bash
-caffeinate -is ./greenlight/run-loop.sh 300
-```
-
-Keep the lid open (closing it forces sleep regardless) and stay plugged in (`-s` only
-prevents sleep on AC power). Nothing to undo afterward — sleep behavior returns to normal
-the moment the loop exits.
+**Prefer the terminal?** The dashboard is optional — the same two prompts run directly in
+Claude Code: `claude "$(cat greenlight/prompts/bootstrap.md)"` once, then
+`claude "$(cat greenlight/prompts/loop.md)"` for the loop. Pin a model with
+`ANTHROPIC_MODEL=claude-opus-4-8` before either command (the dashboard honors it too).
 
 ---
 
 ## While it runs — the two states that matter
 
-**MID-FLIGHT** (between "started" and "finished" lines): the agent is editing your files.
-Don't edit files, don't switch branches, don't pull. Looking is always fine.
+**WORKING** (the header lamp pulses, tools firing in the feed): the agent is editing your
+files. Don't edit files, don't switch branches, don't pull. Watching is always fine.
 
-**Safe window** (after a "finished" line): do anything — stop the loop, push, clean up.
+**WAITING** (a question card is open, or the feed says the session finished): do anything —
+answer, push, clean up, or start the next run.
 
-Watch progress from a second terminal tab:
-
-```bash
-git log --oneline -10
-```
-Every iteration that does work ends in a commit — this is the loop's diary. (The one
-exception: a loop with nothing to do but wait for an answer from you makes no commit.)
-
-```bash
-cat greenlight/CONTROL.md
-```
-The live status board: every feature's state (PLANNED → UNVERIFIED → PASSING → STABLE)
-and the single next action.
+The board panel is the live truth: every feature's state (PLANNED → UNVERIFIED → PASSING →
+STABLE), the single next action, and the commit diary — every iteration that does work ends
+in a commit. (The one exception: an iteration with nothing to do but wait for an answer from
+you makes no commit.) The same truth is always in the files if you prefer a second terminal:
+`git log --oneline -10` and `cat greenlight/CONTROL.md`.
 
 ---
 
 ## Scenarios — "what do I do when..."
 
 **...I want to pause and resume later?**
-Ctrl-C during a safe window. Resume anytime with `./greenlight/run-loop.sh 300` — the
-files are the loop's memory, so it picks up exactly where it left off, even days later.
+Click **Stop** in the dashboard (in the terminal: Esc, then `/exit`). Resume anytime by
+clicking **Start loop** again — the files are the loop's memory, so it picks up exactly
+where it left off, even days later. Closing the dashboard window or Ctrl-C'ing `start.sh`
+is also safe: every finished iteration is already committed.
 
 **...I want my progress backed up on GitHub?**
 The loop only commits locally — nothing leaves your computer on its own. If you started
@@ -220,14 +238,22 @@ time:
 git push
 ```
 
-Safe during a safe window even while the loop is running. If a Pull Request is already open
-from this branch, the push updates that PR automatically — no need to reopen it.
+Pushing is safe even while the loop is running. If a Pull Request is already open from this
+branch, the push updates that PR automatically — no need to reopen it.
 
 **...the loop says it needs ME?**
 When it hits a decision only a human can make (a secret key, a product call, a destructive
-migration) it marks the item BLOCKED, writes the exact question to `greenlight/DECISIONS.md`,
-and pings you — then keeps working on other things. Read the question, append your answer
-under it in `greenlight/DECISIONS.md`, and the next iteration unblocks.
+migration) it marks the item BLOCKED, records the exact question in `greenlight/DECISIONS.md`,
+and asks you — as a question card in the dashboard, or by typing your answer in the box —
+then keeps working on other things. Blocked items also sit in the board's "Waiting on you"
+card until resolved. (If the ask is the ONLY thing left, the loop stops and waits — answer,
+then click Start loop.)
+
+**...I ran it in auto-decide mode — what did it decide while I was away?**
+Open the **Decisions** tab. Every call the loop made on your behalf is there: the question,
+what it chose, and why (it favors reversible choices, so most are easy to change your mind
+on). The same record is saved in `greenlight/DECISIONS.md` and committed with your project,
+so it's permanent — if you disagree with one, tell the loop in the box and it'll revisit it.
 
 **...it says GREENLIGHT ACHIEVED?**
 The loop has stopped itself: every feature stable, security checklist green, UI verified by
@@ -252,32 +278,39 @@ git push origin --delete greenlight-build   # and on GitHub
 ```
 
 **...an iteration did something I don't like?**
-Wait for the safe window, Ctrl-C, find the commit in `git log --oneline`, and undo just it:
-`git revert <commit-id>`. Then note what you didn't like in `greenlight/DECISIONS.md` so
-the loop doesn't redo it, and restart the loop.
+You're watching it live, so just tell it — type what's wrong in the dashboard box; it
+course-corrects in place. For something already committed: Stop, find the commit in the
+board's commit list, undo just it with `git revert <commit-id>`, note what you didn't like
+in `greenlight/DECISIONS.md` so the loop doesn't redo it, and Start loop again. If you want
+veto power *before* changes land, that's the **review each change** toggle.
 
 **...the terminal says `claude: command not found`?**
 PATH problem — redo Part 0 step 2, or open a fresh terminal window.
 
-**...I'm not sure whether it's mid-flight?**
-The last line in the loop's terminal tells you. Backup check from any terminal:
-`pgrep -f 'claude -p' >/dev/null && echo MID-FLIGHT || echo safe`
-
-**...an iteration errors?**
-The loop shrugs and tries again next interval — one failed iteration never kills it. If it
-fails repeatedly, Ctrl-C and run one iteration by hand to see the actual error:
-`claude -p "$(cat greenlight/prompts/loop.md)" --dangerously-skip-permissions`
+**...the session crashed, hung, or hit its usage limit?**
+Nothing is lost — every finished iteration is already committed. Stop it (Ctrl-C the
+dashboard's terminal if it's fully hung), fix whatever it complained about (usage limits
+reset on their own), and Start loop again; it re-reads the files and continues. If it hangs
+repeatedly at the same spot, look at the board's Next action — that's the step it's stuck
+on — and tell it what to do about it in the box.
 
 ---
 
 ## What's under the hood
 
+- **The dashboard** (`greenlight/ui/`) — a small local app (one dependency) that drives
+  Claude Code through the official Agent SDK using your existing login. It streams the
+  session live, turns Claude's questions into buttons, gates changes behind Allow/Deny when
+  review mode is on, and — in **auto-decide** mode — lets the loop answer its own questions
+  and compiles every executive decision (with rationale) into a Decisions tab. It renders
+  the board straight from the files below; it displays state, it never owns it. Everything
+  works identically from a plain terminal.
 - **CONTROL.md** — the brain: what the app is, every feature's live status, a strict
   priority ladder (security first, regressions second), and the single next step.
-- **STANDARDS.md** — how the code must be written: security rules, a "write the least
-  code that works" ladder (inspired by the ponytail skill), logging that never leaks
-  personal data, and UI rules that kill the generic-AI look (design brief, real empty/
-  loading/error states, no dead buttons).
+- **STANDARDS.md** — how the code must be written: security rules, the
+  [ponytail](https://github.com/DietrichGebert/ponytail) "write the least code that works"
+  ladder, logging that never leaks personal data, and UI rules that kill the generic-AI look
+  (design brief, real empty/loading/error states, no dead buttons).
 - **DESIGN.md** — a one-page design brief created at setup so the app has an intentional
   look instead of the statistical average.
 - **STACKS.md** — preset, research-backed technology choices per app type, so the setup

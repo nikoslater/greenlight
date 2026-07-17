@@ -18,7 +18,6 @@ test_commands:
   interaction: "npx playwright test ui"
 autonomous_feature_add: false
 stable_threshold: 3
-notify: "file"
 ---
 
 # CONTROL.md — source of truth for Streak
