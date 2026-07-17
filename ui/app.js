@@ -47,6 +47,7 @@ function settleNewestOpen(kind, label) {
   card.classList.add('settled');
   const picked = card.querySelector('.picked');
   if (picked) { picked.hidden = false; picked.textContent = label; }
+  if (kind === 'question') updateComposerHint();
 }
 
 // Executive decisions: live auto-picks (this session) merge with the durable ones
@@ -106,6 +107,19 @@ function renderEvent(evt) {
   if (type === 'approval') renderApproval(data);
 }
 
+/* The one open question card, if any — typing in the main box answers it. */
+function openQuestionCard() {
+  const cards = feed.querySelectorAll('.ask[data-kind="question"]:not(.settled)');
+  return cards[cards.length - 1] || null;
+}
+
+const SAY_DEFAULT = 'Say something to Claude — answer a question, give direction…';
+function updateComposerHint() {
+  $('say').placeholder = openQuestionCard()
+    ? 'Type your answer here — or click an option above'
+    : SAY_DEFAULT;
+}
+
 function renderQuestion(data) {
   // AskUserQuestion can carry 1-4 questions, each single- or multi-select.
   const questions = (data.questions || []).length ? data.questions : [{ question: '(question)', options: [] }];
@@ -113,61 +127,97 @@ function renderQuestion(data) {
   card.dataset.kind = 'question';
   const answers = {};
   const doneCount = () => Object.keys(answers).length;
+  let finished = false;
 
   const finish = () => {
+    if (finished) return;
+    finished = true;
     card.classList.add('settled');
     const picked = card.querySelector('.picked');
     picked.hidden = false;
     picked.textContent = `you chose: ${Object.values(answers).join(' · ')}`;
     post('/answer', { id: data.id, answers });
+    updateComposerHint();
   };
 
+  const boxes = [];
   questions.forEach((q) => {
     const box = document.createElement('div');
     box.innerHTML = `
       <h3>${esc(q.question)}</h3>
       ${q.header ? `<div class="why">${esc(q.header)}</div>` : ''}
-      <div class="opts"></div>`;
+      <div class="opts"></div>
+      <div class="other-row" hidden>
+        <input type="text" placeholder="Your answer…">
+        <button type="button">Answer</button>
+      </div>`;
     const opts = box.querySelector('.opts');
+    const otherRow = box.querySelector('.other-row');
+    const otherInput = otherRow.querySelector('input');
     const selected = new Set();
+
+    // Set a final answer for this question (button label or free text).
+    const set = (label) => {
+      answers[q.question] = label;
+      [...opts.children].forEach((b) => b.classList.toggle('on', b.dataset.label === label));
+      if (!q.multiSelect && doneCount() === questions.length) finish();
+    };
 
     const pick = (label) => {
       if (q.multiSelect) {
         selected.has(label) ? selected.delete(label) : selected.add(label);
         [...opts.children].forEach((b) => b.classList.toggle('on', selected.has(b.dataset.label)));
-        answers[q.question] = [...selected].join(', ');
-        if (!selected.size) delete answers[q.question];
+        if (selected.size) answers[q.question] = [...selected].join(', ');
+        else delete answers[q.question];
         return;
       }
-      answers[q.question] = label;
-      [...opts.children].forEach((b) => b.classList.toggle('on', b.dataset.label === label));
-      if (doneCount() === questions.length) finish();
+      set(label);
     };
 
     (q.options || []).forEach((o) => {
       const b = document.createElement('button');
+      b.type = 'button';
       b.dataset.label = o.label;
       b.innerHTML = `${esc(o.label)}${o.description ? `<small>${esc(o.description)}</small>` : ''}`;
       b.onclick = () => pick(o.label);
       opts.appendChild(b);
     });
+
+    // "Other…" reveals an inline input inside the card — no browser popups.
     const other = document.createElement('button');
+    other.type = 'button';
     other.dataset.label = '__other__';
     other.innerHTML = 'Other…<small>type your own answer</small>';
-    other.onclick = () => {
-      const text = prompt(q.question);
-      if (!text) return;
-      answers[q.question] = text;
-      other.classList.add('on');
-      if (!q.multiSelect && doneCount() === questions.length) finish();
-    };
+    other.onclick = () => { otherRow.hidden = false; otherInput.focus(); };
     opts.appendChild(other);
+
+    const submitOther = () => {
+      const text = otherInput.value.trim();
+      if (!text) return;
+      other.classList.add('on');
+      otherRow.hidden = true;
+      set(text);
+    };
+    otherRow.querySelector('button').onclick = submitOther;
+    otherInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); submitOther(); }
+    });
+
+    boxes.push({ q, set });
     card.appendChild(box);
   });
+
+  // Free text typed in the MAIN box answers the first unanswered question here.
+  card._answerFree = (text) => {
+    const target = boxes.find(({ q }) => !(q.question in answers)) || boxes[boxes.length - 1];
+    target.set(text);
+    if (doneCount() === questions.length) finish();
+  };
 
   // Multi-select (or multi-question with a multiSelect present) needs an explicit submit.
   if (questions.some((q) => q.multiSelect)) {
     const done = document.createElement('button');
+    done.type = 'button';
     done.className = 'submit';
     done.textContent = 'Send answers';
     done.onclick = () => { if (doneCount() === questions.length) finish(); };
@@ -178,6 +228,7 @@ function renderQuestion(data) {
   picked.className = 'picked';
   picked.hidden = true;
   card.appendChild(picked);
+  updateComposerHint();
   scrollFeed();
 }
 
@@ -337,6 +388,10 @@ $('composer').onsubmit = (e) => {
   const text = $('say').value.trim();
   if (!text) return;
   $('say').value = '';
+  // If a question is waiting, whatever you type IS the answer — one path, no
+  // detached messages that quietly queue behind a blocked session.
+  const open = openQuestionCard();
+  if (open && open._answerFree) { open._answerFree(text); return; }
   post('/send', { text });
 };
 

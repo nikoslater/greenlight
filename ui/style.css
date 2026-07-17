@@ -207,6 +207,28 @@ main {
 .ask.settled .opts { display: none; }
 .ask .picked { color: var(--good); font-size: 13px; }
 
+.ask .other-row { display: flex; gap: 8px; margin-top: 10px; }
+.ask .other-row input {
+  flex: 1;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--ink-15);
+  border-radius: 6px;
+  padding: 7px 10px;
+}
+.ask .other-row input:focus { outline: none; border-color: var(--ink); }
+.ask .other-row button {
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 6px;
+  padding: 7px 14px;
+}
+.ask .other-row button:hover { background: var(--accent); border-color: var(--accent); }
+.ask.settled .other-row { display: none; }
+
 /* composer */
 
 #composer {
