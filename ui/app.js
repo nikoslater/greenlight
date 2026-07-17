@@ -310,7 +310,7 @@ function fillModels(models, selected) {
   const sel = $('model');
   if (!sel.dataset.filled) {
     sel.innerHTML = (models || [])
-      .map((m) => `<option value="${esc(m.value)}">${esc(m.label)}${m.note ? ` — ${esc(m.note)}` : ''}</option>`)
+      .map((m) => `<option value="${esc(m.value)}">${esc(m.label)}</option>`)
       .join('');
     sel.dataset.filled = '1';
   }

@@ -37,11 +37,11 @@ const readIf = async (p) => {
 // session runs. '' / 'default' means "let your account default decide".
 
 const MODELS = [
-  { value: 'default', label: 'Default', note: 'your account default' },
-  { value: 'opus', label: 'Opus 4.8', note: 'most capable' },
-  { value: 'sonnet', label: 'Sonnet 5', note: 'fast, efficient' },
-  { value: 'haiku', label: 'Haiku 4.5', note: 'fastest, lightest' },
-  { value: 'claude-fable-5', label: 'Fable 5', note: 'Opus quality, faster output' },
+  { value: 'default', label: 'Default' },
+  { value: 'opus', label: 'Opus 4.8' },
+  { value: 'sonnet', label: 'Sonnet 5' },
+  { value: 'haiku', label: 'Haiku 4.5' },
+  { value: 'claude-fable-5', label: 'Fable 5' },
 ];
 const MODEL_PREF = path.join(GL_DIR, 'state', 'ui-model');
 
