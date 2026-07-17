@@ -189,8 +189,12 @@ hits a decision only you can make.
 - **Pick the model** from the dropdown at the top left — Default, Opus 4.8, Sonnet 5, Haiku
   4.5, or Fable 5. Your choice is remembered across restarts, applies to the next run, and
   switches the *running* loop live if you change it mid-session.
-- **Steer anytime**: type in the box — "focus on the dashboard feature next", "don't use
-  that library" — it course-corrects.
+- **Say anything — it gets booked, never just chatted.** Everything you type goes through
+  Greenlight's records, before, during, or after greenlight: a bug becomes a tracked issue
+  (feature drops to BROKEN), a feature idea becomes a registry row with a contract, a
+  security worry becomes a checklist item, "don't use that library" becomes a recorded
+  decision it follows from then on — and then the loop acts on it. Pure questions get
+  answered from the project's own records. The box is a steering wheel, not a chat window.
 - **Stop** button halts the session safely. The files are the loop's memory, so stopping is
   always safe: Start loop later and it picks up exactly where the ledgers say it left off.
 - **Overnight (Mac):** system sleep pauses the loop, so start the dashboard with

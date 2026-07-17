@@ -6,6 +6,8 @@ back at step 0 — re-reading the files fresh, because the files are the memory,
 recollection of them (this session may also be resumed by someone with zero context; the
 files must always be enough). Keep iterating until step 0 stops you, or a waiting state
 (CONTROL.md §0) leaves nothing actionable — then tell the human exactly what you need and stop.
+If the human sends a message at any point during the session, it is intake, not chat: triage
+it per CONTROL.md §0's Intake rule (book it, adjust the board) before continuing the ladder.
 
 Every Greenlight file lives under `greenlight/`: the working docs (CONTROL.md, STANDARDS.md,
 STACKS.md, DESIGN.md, LEDGER.md, DECISIONS.md, CHANGELOG.md) sit directly in `greenlight/`,

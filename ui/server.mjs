@@ -469,22 +469,25 @@ function preamble() {
   return p;
 }
 
-// A message typed while idle isn't just chat — after GREENLIGHT it's usually a bug
-// report, and it must flow through Greenlight's books, not around them.
-const MAINTENANCE_NOTE =
-  'This project runs on Greenlight (docs in greenlight/). If the message below reports a bug ' +
-  'or problem with the app, or asks for a change: follow CONTROL.md §0\'s Maintenance rule — ' +
-  'file a `Type: issue` entry in greenlight/DECISIONS.md (title `Issue: <summary>`, Feature:, ' +
-  'Status: open), demote the affected feature(s) to BROKEN on the §3 board (a new request ' +
-  'becomes a PLANNED registry row with a Contract), set `greenlight: "no"` if it was "yes", and ' +
-  'commit that bookkeeping. Then continue by running the loop protocol in ' +
-  'greenlight/prompts/loop.md to fix and re-prove it. If the message is just a question or ' +
-  'comment, answer it and change nothing.\n\nThe human says: ';
+// Every human message is project input — before, during, or after GREENLIGHT. It
+// always flows through Greenlight's books (CONTROL §0 Intake), never around them.
+const INTAKE_NOTE =
+  'This project runs on Greenlight (docs in greenlight/). The message below is project ' +
+  'input, never plain chat — triage it per greenlight/CONTROL.md §0\'s Intake rule: a bug ' +
+  'becomes a `Type: issue` DECISIONS entry + a BROKEN demotion on the board; a feature ' +
+  'request or idea becomes a PLANNED Registry row with a Contract (the request itself is ' +
+  'the human\'s approval) + a DECISIONS entry; a security concern becomes a SEC-### row or ' +
+  '§4 item + a security entry; a design change updates DESIGN.md and the UX-### contract; ' +
+  'a direction becomes a `Type: decision` entry you then follow. Set `greenlight: "no"` if ' +
+  'it was "yes" and the message created work. Commit the bookkeeping. Then, if any work now ' +
+  'exists, continue by running the loop protocol in greenlight/prompts/loop.md to build or ' +
+  'fix and re-prove it. Only a pure question changes nothing — and even then, answer it from ' +
+  'the project files, not from memory.\n\nThe human says: ';
 
 async function startMode(mode, text) {
   if (session.active || session.starting) return { error: 'A session is already running. Stop it first.' };
   session.starting = true;     // synchronous guard: blocks a second click during the awaits below
-  if (mode === 'chat') { runSession('chat', preamble() + MAINTENANCE_NOTE + text); return {}; }
+  if (mode === 'chat') { runSession('chat', preamble() + INTAKE_NOTE + text); return {}; }
   const file = mode === 'bootstrap' ? 'prompts/bootstrap.md' : 'prompts/loop.md';
   const prompt = await readIf(path.join(GL_DIR, file));
   if (!prompt) { session.starting = false; return { error: `${file} not found — is Greenlight installed in this project?` }; }
@@ -618,7 +621,8 @@ const server = http.createServer(async (req, res) => {
         if (r.error) broadcast('error', { message: r.error });
         return send(200, r);
       }
-      pushUser(text);
+      // Mid-session messages are intake too — booked, not chatted.
+      pushUser(`(Message from the human — triage it per greenlight/CONTROL.md §0's Intake rule, then continue.) ${text}`);
       broadcast('you', { text });
       return send(200, {});
     }
